@@ -1,0 +1,7 @@
+README.md
+pyproject.toml
+src/persuasion.egg-info/PKG-INFO
+src/persuasion.egg-info/SOURCES.txt
+src/persuasion.egg-info/dependency_links.txt
+src/persuasion.egg-info/requires.txt
+src/persuasion.egg-info/top_level.txt
