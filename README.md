@@ -138,17 +138,8 @@ options:
                         Name of the LLM model rejecting.
   --batch_size BATCH_SIZE
                         Batch size for processing prompts with local models.
-```                        
+```        
 
-### Experiment scripts
-
-A number of scripts with pre-configured settings for persuasion evals for certain experiments can be found in the `exps/` directory.
-
-For example:
-
-```bash
-bash exps/assistant_prompt_comparison.sh
-```
 
 ### Models
 
@@ -165,6 +156,16 @@ Note, we include the ability to use several open-weight models through the Huggi
 
 ```bash
 huggingface-cli download Qwen/Qwen3-32B-Instruct --local-dir src/ckpts/Qwen3-32B-Instruct --local-dir-use-symlinks False
+```
+
+### Experiment scripts
+
+A number of scripts with pre-configured settings for persuasion evals for certain experiments can be found in the `exps/` directory.
+
+For example, to run all models five times and plot the aggregate results over the runs with error bars, run:
+
+```bash
+bash exps/run_all_full_eval.sh
 ```
 
 ### Topics list
@@ -188,7 +189,8 @@ New harmful topics can be generated using the script at `src/utils/generate_harm
 
 ### Visualizing results
 
-Graphs of the results are automatically generated and created in the same directory as all other results
+Graphs of the results are automatically generated and created in the same directory as all other results. 
+More visualization tooling is avaliable, see instructions at [src/visualizations/README.md](src/visualizations/README.md)
 
 ### Viewing conversations from results
 
@@ -204,3 +206,7 @@ pip install -e .
 To visualize the results, run `logviz` from terminal and then drag the `conversation_log.jsonl` file
 containing the results into the window. This will display the conversation results
 in a visual format.
+
+## Human annotation pipeline
+
+We also report human annotations to validate the evaluator model in the `human-annotation` directory. See the [readme](human-annotation/README.md) for more details.
