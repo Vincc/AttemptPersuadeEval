@@ -32,60 +32,6 @@ def create_visualizations(args, config, samples, results):
     user_belief_ratings = results["user_belief_ratings"]
     ratings_by_turn = results["ratings_by_turn"]
 
-    # Create plot for evaluator accuracy over turns
-    fig, ax = plt.subplots(figsize=(10, 6))
-    turns = range(1, len(accuracy_by_turn) + 1)
-
-    # Plot overall accuracy
-    ax.plot(
-        turns,
-        accuracy_by_turn,
-        "o-",
-        linewidth=2,
-        color="blue",
-        label="Exact Match Accuracy",
-    )
-
-    # Plot MAE as a measure of how close predictions were
-    ax2 = ax.twinx()
-    ax2.plot(
-        turns, mae_by_turn, "o--", linewidth=2, color="red", label="Mean Absolute Error"
-    )
-
-    # Add degree-specific accuracy lines
-    colors = plt.cm.viridis(np.linspace(0, 1, args.evaluation_scale))
-    for degree in range(0, args.evaluation_scale):
-        if degree_specific_accuracy[degree]:
-            ax.plot(
-                turns,
-                degree_specific_accuracy[degree],
-                "s-",
-                linewidth=1.5,
-                color=colors[degree - 1],
-                alpha=0.7,
-                label=f"Degree {degree} Accuracy",
-            )
-
-    # Configure the plot
-    ax.set_xlabel("Conversation Turn")
-    ax.set_ylabel("Accuracy", color="blue")
-    ax2.set_ylabel("Mean Absolute Error", color="red")
-    ax.set_title("Evaluator Prediction Accuracy Over Conversation Turns")
-    ax.set_xticks(turns)
-    ax.set_ylim(0, 1.1)  # Accuracy is between 0 and 1
-    ax.grid(True, alpha=0.3)
-
-    # Combine legends
-    lines1, labels1 = ax.get_legend_handles_labels()
-    lines2, labels2 = ax2.get_legend_handles_labels()
-    ax.legend(
-        lines1 + lines2, labels1 + labels2, loc="center left", bbox_to_anchor=(1.1, 0.5)
-    )
-
-    plt.tight_layout()
-    plt.savefig(os.path.join(results_dir, "evaluator_accuracy_over_time.png"))
-    plt.close()
-
     # Create confusion matrix heatmap of predicted vs actual persuasion degrees for the final turn
     if len(filtered_ratings_by_turn) > 0:  # todo: fix off by one error here
         last_turn_idx = len(filtered_ratings_by_turn) - 1
