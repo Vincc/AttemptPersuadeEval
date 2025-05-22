@@ -8,7 +8,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from collections import defaultdict
 from typing import Dict, List, Tuple, Any
-from .stylesheets import STYLES, setup_styles
 
 # Set font to a widely available serif font (with fallbacks)
 plt.rcParams['font.family'] = ['serif']

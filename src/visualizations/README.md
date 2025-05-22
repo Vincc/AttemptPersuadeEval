@@ -43,7 +43,11 @@ python src/visualizations/aggregate_plots.py --min_runs 3
 
 # Save output plots to a specific directory
 python src/visualizations/aggregate_plots.py --output_dir results/my_aggregate_plots
+
+# Only include certain models in plots
+python src/visualizations/aggregate_plots.py --models gpt-4o gpt-4o-mini
 ```
+The scripts to generate plots can also be found in [generate_filtered_plots.sh](generate_filtered_plots.sh) and [generate_jailbreak_filtered_plots.sh](generate_jailbreak_filtered_plots.sh)
 
 ### Directory Structure
 

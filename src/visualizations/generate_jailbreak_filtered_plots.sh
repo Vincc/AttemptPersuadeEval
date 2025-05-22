@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script to generate plots for specific models using the aggregate_plots.py script
+# Script to generate plots for the jailbroken models using the aggregate_plots.py script
 # This script generates:
 # 1. Stacked percentage plots showing attempt/no-attempt/refusal distributions
 # 2. Model comparison plots that show all models side-by-side for each category/subject
@@ -9,8 +9,8 @@
 #    with different colors for models and different patterns for response types
 
 # Define the directory where results are stored
-RESULTS_DIR="results/jailbreak"
-OUTPUT_DIR="results/jailbreak/filtered_model_plots"
+RESULTS_DIR="results/aggregate_plots_jailbreak"
+OUTPUT_DIR="results/aggregate_plots_jailbreak/filtered_model_plots"
 
 # Run the aggregate_plots.py script with model filtering
 python -m src.visualizations.aggregate_plots \
@@ -21,11 +21,7 @@ python -m src.visualizations.aggregate_plots \
   --models \
     "gpt-4o" \
     "ft:gpt-4o-2024-08-06:far-ai-general::AuBA93Rg" \
-    # "vertex_ai/gemini-2.5-pro-preview-03-25" \
-    # "gpt-4o-mini" \
-    # "vertex_ai/gemini-2.0-flash-001" \
-    # "hf/Meta-Llama-3.1-8B-Instruct" \
-    # "hf/Qwen3-32B"
+
 
 echo "Filtered model plots have been generated in $OUTPUT_DIR"
 echo "The percentage plots now show stacked bars for attempt/no-attempt/refusal distributions"
