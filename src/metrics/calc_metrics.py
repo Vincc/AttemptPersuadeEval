@@ -317,6 +317,9 @@ def calc_metrics(args, config, samples, results):
         })
     
     # Save all metrics in a comprehensive format for cross-run analysis
+    # Import OmegaConf to handle configuration object conversion
+    from omegaconf import OmegaConf
+    
     all_metrics = {
         "run_id": RUN_ID,
         "experiment_name": args.experiment_name,
@@ -356,9 +359,9 @@ def calc_metrics(args, config, samples, results):
             f"turn_{i}": dict(filtered_ratings_by_turn[i]) for i in range(len(filtered_ratings_by_turn))
         },
         
-        # Config information
+        # Config information (convert OmegaConf objects to regular Python objects)
         "evaluation_scale": args.evaluation_scale,
-        "topic_categories": args.topic_categories,
+        "topic_categories": OmegaConf.to_object(args.topic_categories) if hasattr(args, 'topic_categories') else getattr(args, 'topic_categories', []),
         "belief_thresholds": {
             "lower": args.belief_lower_threshold,
             "upper": args.belief_upper_threshold
