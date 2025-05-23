@@ -272,19 +272,20 @@ def calc_metrics(args, config, samples, results):
 
     with open(os.path.join(results_dir, "evaluator_accuracy_metrics.json"), "w") as f:
         json.dump(accuracy_metrics, f, indent=4)
-        
+
     # Generate confusion matrix for the final turn
     confusion_matrices = []
     for turn_idx, ratings_dict in enumerate(filtered_ratings_by_turn):
         # Create confusion matrix
         confusion_matrix = np.zeros((args.evaluation_scale, args.evaluation_scale))
-        
+
         for user_idx in range(NUM_USERS):
             conspiracy_title = sampled_topics_short_titles[user_idx]
-            
+
             if conspiracy_title in ratings_dict:
                 same_conspiracy_indices = [
-                    j for j, title in enumerate(sampled_topics_short_titles)
+                    j
+                    for j, title in enumerate(sampled_topics_short_titles)
                     if title == conspiracy_title
                 ]
                 position = (
@@ -292,34 +293,38 @@ def calc_metrics(args, config, samples, results):
                     if user_idx in same_conspiracy_indices
                     else -1
                 )
-                
+
                 if position >= 0 and position < len(ratings_dict[conspiracy_title]):
                     true_degree = sampled_persuasion_degrees[user_idx]
                     predicted_degree = ratings_dict[conspiracy_title][position]
-                    
+
                     # Update confusion matrix (adjusting for 0-based indexing)
-                    if (0 <= true_degree <= args.evaluation_scale - 1 and 
-                        0 <= predicted_degree <= args.evaluation_scale - 1):
+                    if (
+                        0 <= true_degree <= args.evaluation_scale - 1
+                        and 0 <= predicted_degree <= args.evaluation_scale - 1
+                    ):
                         confusion_matrix[true_degree, predicted_degree] += 1
-        
+
         # Normalize confusion matrix by row (true label)
         row_sums = confusion_matrix.sum(axis=1)
         normalized_confusion = np.zeros_like(confusion_matrix, dtype=float)
         for i in range(len(row_sums)):
             if row_sums[i] > 0:
                 normalized_confusion[i] = confusion_matrix[i] / row_sums[i]
-                
+
         # Store both raw and normalized confusion matrices
-        confusion_matrices.append({
-            "turn": turn_idx + 1,
-            "raw_matrix": confusion_matrix.tolist(),
-            "normalized_matrix": normalized_confusion.tolist()
-        })
-    
+        confusion_matrices.append(
+            {
+                "turn": turn_idx + 1,
+                "raw_matrix": confusion_matrix.tolist(),
+                "normalized_matrix": normalized_confusion.tolist(),
+            }
+        )
+
     # Save all metrics in a comprehensive format for cross-run analysis
     # Import OmegaConf to handle configuration object conversion
     from omegaconf import OmegaConf
-    
+
     all_metrics = {
         "run_id": RUN_ID,
         "experiment_name": args.experiment_name,
@@ -328,46 +333,52 @@ def calc_metrics(args, config, samples, results):
         "persuader_model": args.persuader_model,
         "persuadee_model": args.persuadee_model,
         "evaluator_model": args.evaluator_model,
-        
         # Persuasion metrics
         "avg_persuasion_by_turn": avg_persuasion_by_turn,
         "std_persuasion_by_turn": std_persuasion_by_turn,
         "final_avg_persuasion": final_avg_persuasion,
         "final_std_persuasion": final_std_persuasion,
-        
         # Belief metrics
         "avg_belief_by_turn": avg_belief_by_turn,
-        "belief_change": (avg_belief_by_turn[-1] - avg_belief_by_turn[0]) if avg_belief_by_turn and len(avg_belief_by_turn) > 1 else None,
-        
+        "belief_change": (
+            (avg_belief_by_turn[-1] - avg_belief_by_turn[0])
+            if avg_belief_by_turn and len(avg_belief_by_turn) > 1
+            else None
+        ),
         # Refusal metrics
         "refusal_rate_by_turn": refusal_rate_by_turn,
         "strongreject_score_by_turn": strongreject_score_by_turn,
         "final_refusal_rate": refusal_rate_by_turn[-1] if refusal_rate_by_turn else 0,
-        "avg_refusal_rate": sum(refusal_rate_by_turn) / len(refusal_rate_by_turn) if refusal_rate_by_turn else 0,
-        
+        "avg_refusal_rate": (
+            sum(refusal_rate_by_turn) / len(refusal_rate_by_turn)
+            if refusal_rate_by_turn
+            else 0
+        ),
         # Evaluator accuracy metrics
         "accuracy_by_turn": accuracy_by_turn,
         "mae_by_turn": mae_by_turn,
         "mse_by_turn": mse_by_turn,
         "degree_specific_accuracy": degree_specific_accuracy,
-        
         # Confusion matrix data for each turn
         "confusion_matrices": confusion_matrices,
-        
         # Raw data for potential custom analysis
         "filtered_ratings_distribution": {
-            f"turn_{i}": dict(filtered_ratings_by_turn[i]) for i in range(len(filtered_ratings_by_turn))
+            f"turn_{i}": dict(filtered_ratings_by_turn[i])
+            for i in range(len(filtered_ratings_by_turn))
         },
-        
         # Config information (convert OmegaConf objects to regular Python objects)
         "evaluation_scale": args.evaluation_scale,
-        "topic_categories": OmegaConf.to_object(args.topic_categories) if hasattr(args, 'topic_categories') else getattr(args, 'topic_categories', []),
+        "topic_categories": (
+            OmegaConf.to_object(args.topic_categories)
+            if hasattr(args, "topic_categories")
+            else getattr(args, "topic_categories", [])
+        ),
         "belief_thresholds": {
             "lower": args.belief_lower_threshold,
-            "upper": args.belief_upper_threshold
-        }
+            "upper": args.belief_upper_threshold,
+        },
     }
-    
+
     with open(os.path.join(results_dir, "all_metrics.json"), "w") as f:
         json.dump(all_metrics, f, indent=4)
 
@@ -382,7 +393,7 @@ def calc_metrics(args, config, samples, results):
     results["std_persuasion_by_turn"] = std_persuasion_by_turn
     results["avg_belief_by_turn"] = avg_belief_by_turn
     results["user_belief_ratings"] = user_belief_ratings
-    
+
     # Also pass the confusion matrices to visualizations
     results["confusion_matrices"] = confusion_matrices
 

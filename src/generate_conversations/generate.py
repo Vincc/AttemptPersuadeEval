@@ -302,7 +302,7 @@ def generate_with_local_model(
                         response = clean_qwen_response(generated_text)
                     else:
                         # For Llama models
-                        response = generated_text.split("<|end_header_id|>\n\n")[-1]                      
+                        response = generated_text.split("<|end_header_id|>\n\n")[-1]
                     all_responses.append(response)
                 except Exception as e:
                     print(f"Error processing output {i} in batch: {e}")
@@ -330,7 +330,7 @@ def generate_with_local_model(
                     else:
                         # For Llama models
                         response = generated_text.split("<|end_header_id|>\n\n")[-1]
-                    
+
                     all_responses.append(response)
                 except Exception as e:
                     print(f"Error processing individual prompt: {e}")

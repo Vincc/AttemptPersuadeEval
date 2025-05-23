@@ -3,6 +3,7 @@ import os
 import random  # Add random for shuffling
 import re
 
+
 def generate_dataset():
     """Generate the dataset programmatically."""
     models = ["hf/Meta-Llama-3.1-8B-Instruct", "gpt-4o"]
@@ -71,7 +72,7 @@ def find_matching_conversation(dataset_entry, conversation_log, topics):
 
     # Process each sample
     for sample_id, sample_entries in samples.items():
-        
+
         # Calculate the number of entries to skip for previous turns
         entries_to_skip = (dataset_entry["turn"] - 1) * 4
 
@@ -306,6 +307,7 @@ def output_dataset(dataset, output_file):
     print(f"Created full dataset at {output_file}")
     print(f"Created annotation dataset at {annotation_file}")
 
+
 def load_topics(topics_path):
     """Load topics from the JSONL file."""
     with open(topics_path, "r") as f:
@@ -323,7 +325,11 @@ if __name__ == "__main__":
     dataset = generate_dataset()
 
     topics_path = os.path.join(
-        os.path.dirname(__file__), "..", "src", "topics", "diverse_topics_conspiracy.jsonl"
+        os.path.dirname(__file__),
+        "..",
+        "src",
+        "topics",
+        "diverse_topics_conspiracy.jsonl",
     )
     topics = load_topics(topics_path)
 

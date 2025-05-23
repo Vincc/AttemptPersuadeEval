@@ -103,7 +103,7 @@ def create_visualizations(args, config, samples, results):
             tick_interval = 20 if args.evaluation_scale >= 100 else 5
             x_ticks = np.arange(0, args.evaluation_scale, tick_interval)
             y_ticks = np.arange(0, args.evaluation_scale, 5)
-            
+
             ax.set_xticks(x_ticks)
             ax.set_yticks(y_ticks)
             ax.set_xticklabels([f"{i}" for i in x_ticks])
@@ -1113,89 +1113,116 @@ def create_visualizations(args, config, samples, results):
     # Save all visualization metrics for cross-run analysis
     def save_visualization_metrics():
         visualization_metrics = {}
-        
+
         # Get topic categories from the topics
         topic_categories = set([topic["category"] for topic in topics])
         topic_categories = sorted(list(topic_categories))
-        
+
         # Metrics by category and turn
         category_metrics_by_turn = []
-        
+
         # Store NH subjects data by turn if available
         nh_subjects_metrics_by_turn = []
-        
+
         for turn_idx, turn_ratings in enumerate(filtered_ratings_by_turn):
             # Organize ratings by category and persuasion attempt status
             category_ratings = {
                 category: {"with_attempt": [], "no_attempt": [], "refusal": []}
                 for category in topic_categories
             }
-            
+
             # Collect NH subject data if this category exists
             nh_subject_ratings = {}
-            
+
             for user_idx in range(NUM_USERS):
                 topic_idx = user_idx % len(topics)
                 category = topics[topic_idx]["category"]
-                
+
                 # If this is an NH category topic, also collect by subject
                 if category == "NoncontroversiallyHarmful":
                     subject = topics[topic_idx].get("subject", "unknown")
                     if subject not in nh_subject_ratings:
                         nh_subject_ratings[subject] = {
-                            "with_attempt": [], 
-                            "no_attempt": [], 
-                            "refusal": []
+                            "with_attempt": [],
+                            "no_attempt": [],
+                            "refusal": [],
                         }
-                
+
                 # Get the persuasion score
                 conspiracy_title = sampled_topics_short_titles[user_idx]
-                
+
                 if conspiracy_title in turn_ratings:
                     same_conspiracy_indices = [
-                        j for j, title in enumerate(sampled_topics_short_titles)
+                        j
+                        for j, title in enumerate(sampled_topics_short_titles)
                         if title == conspiracy_title
                     ]
-                    position = same_conspiracy_indices.index(user_idx) if user_idx in same_conspiracy_indices else -1
-                    
+                    position = (
+                        same_conspiracy_indices.index(user_idx)
+                        if user_idx in same_conspiracy_indices
+                        else -1
+                    )
+
                     if position >= 0 and position < len(turn_ratings[conspiracy_title]):
                         predicted_degree = turn_ratings[conspiracy_title][position]
-                        
+
                         # Check for refusal first
-                        if conspiracy_title in refusals_by_turn[turn_idx] and position < len(refusals_by_turn[turn_idx][conspiracy_title]):
-                            refusal_metrics = refusals_by_turn[turn_idx][conspiracy_title][position]
+                        if conspiracy_title in refusals_by_turn[
+                            turn_idx
+                        ] and position < len(
+                            refusals_by_turn[turn_idx][conspiracy_title]
+                        ):
+                            refusal_metrics = refusals_by_turn[turn_idx][
+                                conspiracy_title
+                            ][position]
                             if refusal_metrics["refusal"] == 1:
-                                category_ratings[category]["refusal"].append(predicted_degree)
+                                category_ratings[category]["refusal"].append(
+                                    predicted_degree
+                                )
                                 # Also add to NH subject if applicable
                                 if category == "NoncontroversiallyHarmful":
-                                    nh_subject_ratings[subject]["refusal"].append(predicted_degree)
+                                    nh_subject_ratings[subject]["refusal"].append(
+                                        predicted_degree
+                                    )
                                 continue  # Skip to next user since this was a refusal
-                        
+
                         # If not a refusal, process as before
                         if predicted_degree > 0:  # An attempt was detected by evaluator
-                            category_ratings[category]["with_attempt"].append(predicted_degree)
+                            category_ratings[category]["with_attempt"].append(
+                                predicted_degree
+                            )
                             # Also add to NH subject if applicable
                             if category == "NoncontroversiallyHarmful":
-                                nh_subject_ratings[subject]["with_attempt"].append(predicted_degree)
+                                nh_subject_ratings[subject]["with_attempt"].append(
+                                    predicted_degree
+                                )
                         else:  # No attempt detected
-                            category_ratings[category]["no_attempt"].append(predicted_degree)
+                            category_ratings[category]["no_attempt"].append(
+                                predicted_degree
+                            )
                             # Also add to NH subject if applicable
                             if category == "NoncontroversiallyHarmful":
-                                nh_subject_ratings[subject]["no_attempt"].append(predicted_degree)
-            
+                                nh_subject_ratings[subject]["no_attempt"].append(
+                                    predicted_degree
+                                )
+
             # Calculate average ratings and counts for each category
             category_avg_ratings = {}
             category_counts = {}
             for category, ratings in category_ratings.items():
-                with_attempt_avg = np.mean(ratings["with_attempt"]) if ratings["with_attempt"] else 0
-                no_attempt_avg = np.mean(ratings["no_attempt"]) if ratings["no_attempt"] else 0
+                with_attempt_avg = (
+                    np.mean(ratings["with_attempt"]) if ratings["with_attempt"] else 0
+                )
+                no_attempt_avg = (
+                    np.mean(ratings["no_attempt"]) if ratings["no_attempt"] else 0
+                )
                 refusal_avg = np.mean(ratings["refusal"]) if ratings["refusal"] else 0
-                
+
                 # Store sample counts
                 with_attempt_count = len(ratings["with_attempt"])
                 no_attempt_count = len(ratings["no_attempt"])
                 refusal_count = len(ratings["refusal"])
-                
+
                 category_avg_ratings[category] = {
                     "with_attempt": with_attempt_avg,
                     "no_attempt": no_attempt_avg,
@@ -1206,11 +1233,13 @@ def create_visualizations(args, config, samples, results):
                     "no_attempt": no_attempt_count,
                     "refusal": refusal_count,
                 }
-            
+
             # Calculate percentages for this turn
             turn_percentages = {}
             for category, counts in category_counts.items():
-                total = counts["with_attempt"] + counts["no_attempt"] + counts["refusal"]
+                total = (
+                    counts["with_attempt"] + counts["no_attempt"] + counts["refusal"]
+                )
                 percentage = (counts["with_attempt"] / total * 100) if total > 0 else 0
                 turn_percentages[category] = {
                     "percentage": percentage,
@@ -1219,50 +1248,54 @@ def create_visualizations(args, config, samples, results):
                     "refusal": counts["refusal"],
                     "total": total,
                 }
-            
-            category_metrics_by_turn.append({
-                "turn": turn_idx + 1,
-                "category_counts": category_counts,
-                "category_avg_ratings": category_avg_ratings,
-                "category_percentages": turn_percentages
-            })
-            
+
+            category_metrics_by_turn.append(
+                {
+                    "turn": turn_idx + 1,
+                    "category_counts": category_counts,
+                    "category_avg_ratings": category_avg_ratings,
+                    "category_percentages": turn_percentages,
+                }
+            )
+
             # Process NH subject data if we have any
             if nh_subject_ratings:
                 nh_subject_counts = {}
                 nh_subject_percentages = {}
-                
+
                 for subject, ratings in nh_subject_ratings.items():
                     with_attempt_count = len(ratings["with_attempt"])
                     no_attempt_count = len(ratings["no_attempt"])
                     refusal_count = len(ratings["refusal"])
-                    
+
                     nh_subject_counts[subject] = {
                         "with_attempt": with_attempt_count,
                         "no_attempt": no_attempt_count,
                         "refusal": refusal_count,
-                        "total": with_attempt_count + no_attempt_count + refusal_count
+                        "total": with_attempt_count + no_attempt_count + refusal_count,
                     }
-                    
+
                     # Calculate percentage
                     total = with_attempt_count + no_attempt_count + refusal_count
                     percentage = (with_attempt_count / total * 100) if total > 0 else 0
-                    
+
                     nh_subject_percentages[subject] = {
                         "percentage": percentage,
                         "with_attempt": with_attempt_count,
                         "no_attempt": no_attempt_count,
                         "refusal": refusal_count,
-                        "total": total
+                        "total": total,
                     }
-                
+
                 # Store the NH subject metrics for this turn
-                nh_subjects_metrics_by_turn.append({
-                    "turn": turn_idx + 1,
-                    "subject_counts": nh_subject_counts,
-                    "subject_percentages": nh_subject_percentages
-                })
-        
+                nh_subjects_metrics_by_turn.append(
+                    {
+                        "turn": turn_idx + 1,
+                        "subject_counts": nh_subject_counts,
+                        "subject_percentages": nh_subject_percentages,
+                    }
+                )
+
         # Context metrics if contexts were used
         context_metrics_by_turn = []
         if "contexts" in args.assistant_prompt and filtered_ratings_by_turn:
@@ -1270,9 +1303,9 @@ def create_visualizations(args, config, samples, results):
             unique_context_titles = list(set(context_titles))
             if "" in unique_context_titles:
                 unique_context_titles.remove("")
-            
+
             unique_context_titles = sorted(unique_context_titles)
-            
+
             if unique_context_titles:
                 for turn_idx, turn_ratings in enumerate(filtered_ratings_by_turn):
                     # Organize data by context title
@@ -1280,76 +1313,104 @@ def create_visualizations(args, config, samples, results):
                         title: {"with_attempt": 0, "no_attempt": 0, "refusal": 0}
                         for title in unique_context_titles
                     }
-                    
+
                     for user_idx in range(NUM_USERS):
                         if user_idx >= len(sampled_context_titles):
                             continue  # Skip if index out of range
-                            
+
                         context_title = sampled_context_titles[user_idx]
                         if context_title not in unique_context_titles:
                             continue  # Skip if not a valid context title
-                            
+
                         # Get conspiracy title for this user
                         conspiracy_title = sampled_topics_short_titles[user_idx]
-                        
+
                         # Check for refusal first
                         refusal = False
                         if conspiracy_title in refusals_by_turn[turn_idx]:
                             same_conspiracy_indices = [
-                                j for j, title in enumerate(sampled_topics_short_titles)
+                                j
+                                for j, title in enumerate(sampled_topics_short_titles)
                                 if title == conspiracy_title
                             ]
-                            position = same_conspiracy_indices.index(user_idx) if user_idx in same_conspiracy_indices else -1
-                            
-                            if position >= 0 and position < len(refusals_by_turn[turn_idx][conspiracy_title]):
-                                refusal_metrics = refusals_by_turn[turn_idx][conspiracy_title][position]
+                            position = (
+                                same_conspiracy_indices.index(user_idx)
+                                if user_idx in same_conspiracy_indices
+                                else -1
+                            )
+
+                            if position >= 0 and position < len(
+                                refusals_by_turn[turn_idx][conspiracy_title]
+                            ):
+                                refusal_metrics = refusals_by_turn[turn_idx][
+                                    conspiracy_title
+                                ][position]
                                 if refusal_metrics["refusal"] == 1:
                                     context_data[context_title]["refusal"] += 1
                                     refusal = True
-                        
+
                         # If not a refusal, check persuasion attempt
                         if not refusal and conspiracy_title in turn_ratings:
                             same_conspiracy_indices = [
-                                j for j, title in enumerate(sampled_topics_short_titles)
+                                j
+                                for j, title in enumerate(sampled_topics_short_titles)
                                 if title == conspiracy_title
                             ]
-                            position = same_conspiracy_indices.index(user_idx) if user_idx in same_conspiracy_indices else -1
-                            
-                            if position >= 0 and position < len(turn_ratings[conspiracy_title]):
-                                predicted_degree = turn_ratings[conspiracy_title][position]
-                                
+                            position = (
+                                same_conspiracy_indices.index(user_idx)
+                                if user_idx in same_conspiracy_indices
+                                else -1
+                            )
+
+                            if position >= 0 and position < len(
+                                turn_ratings[conspiracy_title]
+                            ):
+                                predicted_degree = turn_ratings[conspiracy_title][
+                                    position
+                                ]
+
                                 if predicted_degree > 0:  # Persuasion attempt
                                     context_data[context_title]["with_attempt"] += 1
                                 else:  # No attempt
                                     context_data[context_title]["no_attempt"] += 1
-                    
+
                     # Calculate percentages
                     context_percentages = {}
                     for context in unique_context_titles:
-                        total = context_data[context]["with_attempt"] + context_data[context]["no_attempt"] + context_data[context]["refusal"]
-                        percentage = (context_data[context]["with_attempt"] / total * 100) if total > 0 else 0
+                        total = (
+                            context_data[context]["with_attempt"]
+                            + context_data[context]["no_attempt"]
+                            + context_data[context]["refusal"]
+                        )
+                        percentage = (
+                            (context_data[context]["with_attempt"] / total * 100)
+                            if total > 0
+                            else 0
+                        )
                         context_percentages[context] = {
                             "percentage": percentage,
                             "total": total,
                         }
-                    
-                    context_metrics_by_turn.append({
-                        "turn": turn_idx + 1,
-                        "context_counts": context_data,
-                        "context_percentages": context_percentages
-                    })
-        
+
+                    context_metrics_by_turn.append(
+                        {
+                            "turn": turn_idx + 1,
+                            "context_counts": context_data,
+                            "context_percentages": context_percentages,
+                        }
+                    )
+
         # Belief-persuasion correlation data
         persuasion_belief_correlation = None
         if user_belief_ratings and filtered_ratings_by_turn:
             persuasion_attempt_record = []
             belief_changes = []
-            
+
             for i, user_beliefs in enumerate(user_belief_ratings):
                 if len(user_beliefs) >= 2:  # Need at least initial and final belief
                     # Calculate belief change for this user
                     belief_change = user_beliefs[-1] - user_beliefs[0]
-                    
+
                     # Get the average persuasion score for this user
                     user_persuasion_scores = []
                     for turn_idx in range(len(ratings_by_turn)):
@@ -1357,39 +1418,54 @@ def create_visualizations(args, config, samples, results):
                         if conspiracy_title in filtered_ratings_by_turn[turn_idx]:
                             # Find position of this user within the group with same conspiracy
                             same_conspiracy_indices = [
-                                j for j, title in enumerate(sampled_topics_short_titles)
+                                j
+                                for j, title in enumerate(sampled_topics_short_titles)
                                 if title == conspiracy_title
                             ]
-                            position = same_conspiracy_indices.index(i) if i in same_conspiracy_indices else -1
-                            
-                            if position >= 0 and position < len(filtered_ratings_by_turn[turn_idx][conspiracy_title]):
-                                user_persuasion_scores.append(filtered_ratings_by_turn[turn_idx][conspiracy_title][position])
-                    
+                            position = (
+                                same_conspiracy_indices.index(i)
+                                if i in same_conspiracy_indices
+                                else -1
+                            )
+
+                            if position >= 0 and position < len(
+                                filtered_ratings_by_turn[turn_idx][conspiracy_title]
+                            ):
+                                user_persuasion_scores.append(
+                                    filtered_ratings_by_turn[turn_idx][
+                                        conspiracy_title
+                                    ][position]
+                                )
+
                     if user_persuasion_scores:
-                        avg_persuasion = sum(user_persuasion_scores) / len(user_persuasion_scores)
+                        avg_persuasion = sum(user_persuasion_scores) / len(
+                            user_persuasion_scores
+                        )
                         persuasion_attempt_record.append(avg_persuasion)
                         belief_changes.append(belief_change)
-            
+
             # Calculate correlation if we have enough data points
             correlation = None
             p_value = None
             if len(persuasion_attempt_record) > 1:
-                correlation, p_value = pearsonr(persuasion_attempt_record, belief_changes)
-            
+                correlation, p_value = pearsonr(
+                    persuasion_attempt_record, belief_changes
+                )
+
             persuasion_belief_correlation = {
                 "persuasion_scores": persuasion_attempt_record,
                 "belief_changes": belief_changes,
                 "correlation": correlation,
-                "p_value": p_value
+                "p_value": p_value,
             }
-        
+
         # Get all unique NH subjects across all topics
         nh_subjects = set()
         for topic in topics:
             if topic.get("category") == "NoncontroversiallyHarmful":
                 subject = topic.get("subject", "unknown")
                 nh_subjects.add(subject)
-        
+
         # Assemble all metrics in a structured format
         visualization_metrics = {
             "experiment_name": args.experiment_name,
@@ -1397,42 +1473,44 @@ def create_visualizations(args, config, samples, results):
             "accuracy_metrics": {
                 "accuracy_by_turn": accuracy_by_turn,
                 "mae_by_turn": mae_by_turn,
-                "degree_specific_accuracy": degree_specific_accuracy
+                "degree_specific_accuracy": degree_specific_accuracy,
             },
             "persuasion_metrics": {
                 "avg_persuasion_by_turn": avg_persuasion_by_turn,
-                "std_persuasion_by_turn": std_persuasion_by_turn
+                "std_persuasion_by_turn": std_persuasion_by_turn,
             },
             "belief_metrics": {
                 "avg_belief_by_turn": avg_belief_by_turn,
-                "belief_correlation": persuasion_belief_correlation
+                "belief_correlation": persuasion_belief_correlation,
             },
             "category_metrics": {
                 "topic_categories": list(topic_categories),
-                "turns": category_metrics_by_turn
-            }
+                "turns": category_metrics_by_turn,
+            },
         }
-        
+
         # Add NH subjects metrics if available
         if nh_subjects_metrics_by_turn:
             visualization_metrics["nh_subjects_metrics"] = {
                 "subjects": sorted(list(nh_subjects)),
-                "turns": nh_subjects_metrics_by_turn
+                "turns": nh_subjects_metrics_by_turn,
             }
-        
+
         # Add context metrics if available
         if context_metrics_by_turn:
             visualization_metrics["context_metrics"] = {
-                "context_titles": unique_context_titles if 'unique_context_titles' in locals() else [],
-                "turns": context_metrics_by_turn
+                "context_titles": (
+                    unique_context_titles if "unique_context_titles" in locals() else []
+                ),
+                "turns": context_metrics_by_turn,
             }
-            
+
         # Save to file
         metrics_file_path = os.path.join(results_dir, "visualization_metrics.json")
         with open(metrics_file_path, "w") as f:
             json.dump(visualization_metrics, f, indent=4)
-        
+
         print(f"Saved visualization metrics to {metrics_file_path}")
-    
+
     # Call the function to save metrics
     save_visualization_metrics()

@@ -186,7 +186,9 @@ def main(cfg: DictConfig) -> None:
         "SAMPLE_BELIEF_UPPER": cfg.sample_belief_upper,
         "PROMPTS_FILE": cfg.prompts_file,
         "TOPICS_FILE": cfg.topics_file,
-        "TOPIC_CATEGORIES": OmegaConf.to_object(cfg.topic_categories),  # Convert ListConfig to list
+        "TOPIC_CATEGORIES": OmegaConf.to_object(
+            cfg.topic_categories
+        ),  # Convert ListConfig to list
         "EVALUATION_SCALE": cfg.evaluation_scale,
         "HUMAN_DATA_PATH": cfg.human_data_path,
         "HUMAN_DATA_ROUNDS": cfg.human_data_rounds,
@@ -577,7 +579,10 @@ def main(cfg: DictConfig) -> None:
         else:
             # Use model for all conversations
             message_collection = conversation.add_to_convo(
-                message_collection, model=PERSUADEE_MODEL, user_first=False, batch_size=cfg.batch_size
+                message_collection,
+                model=PERSUADEE_MODEL,
+                user_first=False,
+                batch_size=cfg.batch_size,
             )
 
         last_sampled = [conv[-1] for conv in message_collection]
