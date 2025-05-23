@@ -9,8 +9,8 @@
 #    with different colors for models and different patterns for response types
 
 # Define the directory where results are stored
-RESULTS_DIR="results/aggregate_plots"
-OUTPUT_DIR="results/aggregate_plots/filtered_model_plots"
+RESULTS_DIR="results/situational_contexts/gpt_4o"
+OUTPUT_DIR="results/situational_contexts/gpt_4o/plots"
 
 # Run the aggregate_plots.py script with model filtering
 python -m src.visualizations.aggregate_plots \
@@ -18,13 +18,7 @@ python -m src.visualizations.aggregate_plots \
   --output_dir $OUTPUT_DIR \
   --min_runs 1 \
   --turns 3 \
-  --models \
-    "gpt-4o" \
-    "vertex_ai/gemini-2.5-pro-preview-03-25" \
-    "gpt-4o-mini" \
-    "vertex_ai/gemini-2.0-flash-001" \
-    "hf/Meta-Llama-3.1-8B-Instruct" \
-    "hf/Qwen3-32B"
+    
 
 echo "Filtered model plots have been generated in $OUTPUT_DIR"
 echo "The percentage plots now show stacked bars for attempt/no-attempt/refusal distributions"
@@ -35,3 +29,13 @@ echo "  - model_comparisons_by_nh_subject: Percentage comparisons for each NH su
 echo "  - model_counts_comparisons_by_nh_subject: Raw count comparisons for each NH subject"
 echo "  - all_in_one_comparisons: Single plots with all models and all categories shown together"
 echo "  - all_in_one_nh_comparisons: Single plots with all models and all NH subjects shown together" 
+
+RESULTS_DIR="results/situational_contexts/llama_8b"
+OUTPUT_DIR="results/situational_contexts/llama_8b/plots"
+
+# Run the aggregate_plots.py script with model filtering
+python -m src.visualizations.aggregate_plots \
+  --results_dir $RESULTS_DIR \
+  --output_dir $OUTPUT_DIR \
+  --min_runs 1 \
+  --turns 3 \

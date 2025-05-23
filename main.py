@@ -8,6 +8,9 @@ import random
 from collections import defaultdict
 from datetime import datetime
 
+import hydra
+from hydra.core.hydra_config import HydraConfig
+from omegaconf import DictConfig, OmegaConf
 import pytz
 import yaml
 from dotenv import load_dotenv
@@ -17,21 +20,21 @@ from src.generate_conversations import conversation
 from src.generate_conversations.generate import preload_local_model
 from src.metrics import calc_metrics
 from src.refusal_check import refusal_check
-from src.utils import parse_args, record_event, utils
+from src.utils import record_event, utils
 from src.visualizations import visualizations
 
 
-def main():
+@hydra.main(version_base=None, config_path="configs", config_name="config")
+def main(cfg: DictConfig) -> None:
     load_dotenv()
 
-    args = parse_args.parse_args()
-
+    # Convert OmegaConf to dictionary for easier attribute access if needed
     # LOAD PROMPTS FROM YAML
     try:
-        with open(args.prompts_file, "r", encoding="utf-8") as f:
+        with open(cfg.prompts_file, "r", encoding="utf-8") as f:
             prompts_data = yaml.safe_load(f)
     except FileNotFoundError:
-        print(f"Error: prompts file {args.prompts_file} not found.")
+        print(f"Error: prompts file {cfg.prompts_file} not found.")
         raise
 
     prompts = prompts_data.get("prompts", {})
@@ -44,21 +47,21 @@ def main():
     oppose_string2 = prompts.get("oppose_string2", "this conspiracy is not supported")
 
     # Grab persuasive or baseline prompt
-    if "human" in args.assistant_prompt:
+    if "human" in cfg.assistant_prompt:
         prompt_assistant_bunk = prompts.get("prompt_human_bunk_assistant", "")
         prompt_assistant_debunk = prompts.get("prompt_human_debunk_assistant", "")
-        if not args.human_data_path:
+        if not cfg.human_data_path:
             raise ValueError("Human data path must be provided for human conversations")
     else:
-        prompt_assistant = prompts.get(args.assistant_prompt, "")
+        prompt_assistant = prompts.get(cfg.assistant_prompt, "")
 
     # Sample contexts if needed
     assistant_contexts = [""]
     context_titles = [""]
-    if "contexts" in args.assistant_prompt:
+    if "contexts" in cfg.assistant_prompt:
         # Load contexts from JSONL and make a list
         contexts_data = []
-        with open(args.contexts_file, "r") as file:
+        with open(cfg.contexts_file, "r") as file:
             for line in file:
                 context = json.loads(line)
                 contexts_data.append(context)
@@ -71,24 +74,24 @@ def main():
     user_persona_initial = prompts.get("user_persona_initial", "")
     user_persona_conversation = prompts.get("user_persona_conversation", "")
     # Grab evaluation prompt based on the evaluation scale
-    eval_prompt = prompts.get("evaluate_prompt_" + str(args.evaluation_scale))
+    eval_prompt = prompts.get("evaluate_prompt_" + str(cfg.evaluation_scale))
     assert eval_prompt is not None, (
-        f"Missing evaluation prompt for scale" f" {args.evaluation_scale}"
+        f"Missing evaluation prompt for scale" f" {cfg.evaluation_scale}"
     )
 
     # Grab StrongREJECT prompts
     strongreject_system_prompt = prompts.get("strongreject_system_prompt", "")
     strongreject_rubric_prompt = prompts.get("strongreject_rubric_prompt", "")
 
-    NUM_USERS = args.num_users
-    NUM_TURNS = args.num_turns
-    PERSUADER_MODEL = args.persuader_model
-    PERSUADEE_MODEL = args.persuadee_model
-    EVALUATOR_MODEL = args.evaluator_model
-    REJECT_MODEL = args.reject_model
-    JAILBREAK_TUNING_POSTPROCESS = args.jailbreak_persuader
-    JAILBREAK_TUNING_PERSUADEE = args.jailbreak_persuadee
-    EXPERIMENT_NAME = args.experiment_name
+    NUM_USERS = cfg.num_users
+    NUM_TURNS = cfg.num_turns
+    PERSUADER_MODEL = cfg.persuader_model
+    PERSUADEE_MODEL = cfg.persuadee_model
+    EVALUATOR_MODEL = cfg.evaluator_model
+    REJECT_MODEL = cfg.reject_model
+    JAILBREAK_TUNING_POSTPROCESS = cfg.jailbreak_persuader
+    JAILBREAK_TUNING_PERSUADEE = cfg.jailbreak_persuadee
+    EXPERIMENT_NAME = cfg.experiment_name
 
     # Preload local models if they will be used
     if PERSUADER_MODEL.startswith("hf/"):
@@ -110,51 +113,47 @@ def main():
 
     # Load human conversation data if provided
     human_data = None
-    if args.human_data_path:
+    if cfg.human_data_path:
         try:
-            print(f"Loading human conversation data from {args.human_data_path}...")
-            human_data = utils.load_human_conversation_data(args.human_data_path)
+            print(f"Loading human conversation data from {cfg.human_data_path}...")
+            human_data = utils.load_human_conversation_data(cfg.human_data_path)
             print(f"Loaded {len(human_data)} human conversations")
 
             # Remove if they don't have enough rounds so we don't pollute analysis
-            if args.human_data_rounds > 0:
+            if cfg.human_data_rounds > 0:
                 human_data = {
                     k: v
                     for k, v in human_data.items()
-                    if len(v["turns"]) >= args.human_data_rounds
+                    if len(v["turns"]) >= cfg.human_data_rounds
                 }
                 print(
-                    f"Filtered to {len(human_data)} human conversations with at least {args.human_data_rounds} rounds"
+                    f"Filtered to {len(human_data)} human conversations with at least {cfg.human_data_rounds} rounds"
                 )
         except Exception as e:
             print(f"Error loading human conversation data: {e}")
             raise FileNotFoundError
 
+    # Use Hydra's working directory as the results directory
+    results_dir = HydraConfig.get().runtime.output_dir
     now = datetime.now(pytz.timezone("America/Los_Angeles"))
-    results_dir = os.path.join(
-        args.results_dir,
-        now.strftime("%Y-%m-%d_%H-%M-%S"),
-        EXPERIMENT_NAME,
-    )
-    os.makedirs(results_dir, exist_ok=False)
+
     print(f"Saving to results directory: {results_dir}")
 
     # LOAD topics
-    with open(args.topics_file, "r", encoding="utf-8") as f:
+    with open(cfg.topics_file, "r", encoding="utf-8") as f:
         all_topics = [json.loads(line) for line in f]
 
     # Filter topics based on selected categories
     topics = [
-        topic for topic in all_topics if topic.get("category") in args.topic_categories
+        topic for topic in all_topics if topic.get("category") in cfg.topic_categories
     ]
 
     # If all_topics is set, use all topics and set NUM_USERS accordingly
-    if args.all_topics:
+    if cfg.all_topics:
         sampled_topics = [topic["text"] for topic in topics]
         sampled_topics_short_titles = [
             topic["short_title"] for topic in topics
         ]  # Use short titles for all topics
-        args.NUM_USERS = len(sampled_topics)
         NUM_USERS = len(sampled_topics)
     else:
         random.shuffle(topics)
@@ -178,24 +177,24 @@ def main():
         "EVALUATOR_MODEL": EVALUATOR_MODEL,
         "REJECT_MODEL": REJECT_MODEL,
         "JAILBREAK_TUNING_POSTPROCESS": JAILBREAK_TUNING_POSTPROCESS,
-        "RECORD_ALL_SYSTEM": args.record_all_system,
-        "REMOVE_RATINGS": args.remove_ratings,
+        "RECORD_ALL_SYSTEM": cfg.record_all_system,
+        "REMOVE_RATINGS": cfg.remove_ratings,
         "EXPERIMENT_NAME": EXPERIMENT_NAME,
-        "BELIEF_LOWER_THRESHOLD": args.belief_lower_threshold,
-        "BELIEF_UPPER_THRESHOLD": args.belief_upper_threshold,
-        "SAMPLE_BELIEF_LOWER": args.sample_belief_lower,
-        "SAMPLE_BELIEF_UPPER": args.sample_belief_upper,
-        "PROMPTS_FILE": args.prompts_file,
-        "TOPICS_FILE": args.topics_file,
-        "TOPIC_CATEGORIES": args.topic_categories,
-        "EVALUATION_SCALE": args.evaluation_scale,
-        "HUMAN_DATA_PATH": args.human_data_path,
-        "HUMAN_DATA_ROUNDS": args.human_data_rounds,
-        "ASSISTANT_PROMPT": args.assistant_prompt,
-        "ONLY_PERSUADE": args.only_persuade,
-        "REPHRASE_TOPICS": args.rephrase_topics,
-        "ALL_TOPICS": args.all_topics,
-        "BATCH_SIZE": args.batch_size,
+        "BELIEF_LOWER_THRESHOLD": cfg.belief_lower_threshold,
+        "BELIEF_UPPER_THRESHOLD": cfg.belief_upper_threshold,
+        "SAMPLE_BELIEF_LOWER": cfg.sample_belief_lower,
+        "SAMPLE_BELIEF_UPPER": cfg.sample_belief_upper,
+        "PROMPTS_FILE": cfg.prompts_file,
+        "TOPICS_FILE": cfg.topics_file,
+        "TOPIC_CATEGORIES": OmegaConf.to_object(cfg.topic_categories),  # Convert ListConfig to list
+        "EVALUATION_SCALE": cfg.evaluation_scale,
+        "HUMAN_DATA_PATH": cfg.human_data_path,
+        "HUMAN_DATA_ROUNDS": cfg.human_data_rounds,
+        "ASSISTANT_PROMPT": cfg.assistant_prompt,
+        "ONLY_PERSUADE": cfg.only_persuade,
+        "REPHRASE_TOPICS": cfg.rephrase_topics,
+        "ALL_TOPICS": cfg.all_topics,
+        "BATCH_SIZE": cfg.batch_size,
     }
 
     config_path = os.path.join(results_dir, "experiment_config.json")
@@ -204,37 +203,37 @@ def main():
 
     # Check to see if all categories have been found
     found_categories = set(topic.get("category") for topic in topics)
-    if len(found_categories) != len(args.topic_categories):
+    if len(found_categories) != len(cfg.topic_categories):
         print("Warning: Not all categories found in topics file")
-        print(f"Requested categories: {args.topic_categories}")
+        print(f"Requested categories: {cfg.topic_categories}")
         print(f"Found categories: {found_categories}")
         raise ValueError("No topics found with the specified categories")
 
-    print(f"Using {len(topics)} topics from categories: {args.topic_categories}")
+    print(f"Using {len(topics)} topics from categories: {cfg.topic_categories}")
 
     # rephrase topics if requested
-    if args.rephrase_topics:
+    if cfg.rephrase_topics:
         print("Rephrasing topics...")
         topics = utils.rephrase_topics(topics)
 
     sampled_beliefs = [
-        random.randint(args.sample_belief_lower, args.sample_belief_upper)
+        random.randint(cfg.sample_belief_lower, cfg.sample_belief_upper)
         for _ in range(NUM_USERS)
     ]
-    if args.only_persuade:
+    if cfg.only_persuade:
         sampled_persuasion_degrees = [
-            args.evaluation_scale - 1 for _ in range(NUM_USERS)
+            cfg.evaluation_scale - 1 for _ in range(NUM_USERS)
         ]
     else:
         sampled_persuasion_degrees = [
-            random.randint(0, args.evaluation_scale - 1) for _ in range(NUM_USERS)
+            random.randint(0, cfg.evaluation_scale - 1) for _ in range(NUM_USERS)
         ]
 
     # Decide for/against based on the sampled belief
     argue_for_or_against_list = []
 
     # Adjust evaluation parameters for human data if needed
-    if human_data and args.human_data_rounds > 0:
+    if human_data and cfg.human_data_rounds > 0:
         print("Adjusting evaluation parameters to match human data...")
 
         # Sample human conversations
@@ -279,7 +278,7 @@ def main():
 
             # Set persuasion degree to maximum to ensure strong persuasion attempts
             # Note: This will persuade for or against based on the condition
-            sampled_persuasion_degrees[i] = args.evaluation_scale - 1
+            sampled_persuasion_degrees[i] = cfg.evaluation_scale - 1
 
         # Write out which human conversations are being used
         human_conv_log_path = os.path.join(
@@ -288,7 +287,7 @@ def main():
         with open(human_conv_log_path, "w") as f:
             human_mapping = {
                 "sampled_human_ids": sampled_human_ids,
-                "human_data_rounds": args.human_data_rounds,
+                "human_data_rounds": cfg.human_data_rounds,
             }
             json.dump(human_mapping, f, indent=2)
 
@@ -324,9 +323,9 @@ def main():
     else:
         # Standard logic for randomly sampling beliefs without human data
         for sampled_belief in sampled_beliefs:
-            if sampled_belief <= args.belief_lower_threshold:
+            if sampled_belief <= cfg.belief_lower_threshold:
                 argue_for_or_against_list.append("for")
-            elif sampled_belief >= args.belief_upper_threshold:
+            elif sampled_belief >= cfg.belief_upper_threshold:
                 argue_for_or_against_list.append("against")
             else:
                 argue_for_or_against_list.append(random.choice(["for", "against"]))
@@ -359,7 +358,7 @@ def main():
 
     # ---- Turn 0: User ----
     print("Processing User Turn:", 0)
-    if human_data and args.human_data_rounds > 0:
+    if human_data and cfg.human_data_rounds > 0:
         system_message = ["Using human data for user turn: " for _ in range(NUM_USERS)]
     else:
         system_message = [
@@ -376,7 +375,7 @@ def main():
     )
 
     # Use human conversation data for the first user turn if available and requested
-    if human_data and args.human_data_rounds > 0:
+    if human_data and cfg.human_data_rounds > 0:
         print("Using human data for initial user turn")
         # For each user, take the first user message from the human conversation
         for i, human_id in enumerate(sampled_human_ids):
@@ -388,20 +387,20 @@ def main():
     else:
         # Otherwise use LLM to generate initial user messages
         message_collection = conversation.add_to_convo(
-            message_collection, model=PERSUADEE_MODEL, batch_size=args.batch_size
+            message_collection, model=PERSUADEE_MODEL, batch_size=cfg.batch_size
         )
 
     # After sampling a response, record the conversation
     last_sampled = [conv[-1] for conv in message_collection]
     last_role = None
     record_event.record_sampling_event(
-        args, all_events, last_sampled, last_role, system_message, NUM_USERS, 0
+        cfg, all_events, last_sampled, last_role, system_message, NUM_USERS, 0
     )
 
     # ---- Turn 0: Assistant ----
     print("Processing Assistant Turn:", 0)
     human_turn_counter = 1  # First user turn was 0, this is assistant turn 0
-    if human_data or args.human_data_rounds > human_turn_counter:
+    if human_data or cfg.human_data_rounds > human_turn_counter:
         system_message = []
         for afoa, sb, sc, cs in zip(
             argue_for_or_against_list,
@@ -422,7 +421,7 @@ def main():
                     conspiracyRestatement=sc,
                 )
             # prepend human data message if using human data
-            if human_data and args.human_data_rounds > human_turn_counter:
+            if human_data and cfg.human_data_rounds > human_turn_counter:
                 system_prompt = "Using human data for assistant turn: " + system_prompt
             system_message.append(system_prompt)
     else:
@@ -436,7 +435,7 @@ def main():
                     endorse_string2 if afoa == "for" else oppose_string2
                 ),
                 assistantPersuasionDegree=adp,
-                evaluationScale=args.evaluation_scale - 1,
+                evaluationScale=cfg.evaluation_scale - 1,
             )
             for afoa, sb, sc, adp, cntxt in zip(
                 argue_for_or_against_list,
@@ -452,7 +451,7 @@ def main():
     )
 
     # Use human conversation data for the first assistant turn if available and requested
-    if human_data and args.human_data_rounds > human_turn_counter:
+    if human_data and cfg.human_data_rounds > human_turn_counter:
         print("Using human data for initial assistant turn")
 
         for i, human_id in enumerate(sampled_human_ids):
@@ -467,15 +466,15 @@ def main():
             message_collection,
             model=PERSUADER_MODEL,
             postprocess_responses=JAILBREAK_TUNING_POSTPROCESS,
-            remove_ratings=args.remove_ratings,
-            batch_size=args.batch_size,
+            remove_ratings=cfg.remove_ratings,
+            batch_size=cfg.batch_size,
         )
 
     last_sampled = [conv[-1] for conv in message_collection]
     last_role = "user"
     # After sampling a response, record the conversation
     record_event.record_sampling_event(
-        args, all_events, last_sampled, last_role, system_message, NUM_USERS, 0
+        cfg, all_events, last_sampled, last_role, system_message, NUM_USERS, 0
     )
 
     def run_evaluation(conv, sampled_topics, argue_for_or_against_list, turn):
@@ -552,7 +551,7 @@ def main():
     turn_counter = 1
     for i in range(NUM_TURNS - 1):
         print("Processing User Turn:", i + 1)
-        if human_data and args.human_data_rounds > human_turn_counter:
+        if human_data and cfg.human_data_rounds > human_turn_counter:
             system_message = [
                 "Using human data for user turn" for _ in range(NUM_USERS)
             ]
@@ -566,7 +565,7 @@ def main():
             system_message,
         )
 
-        if human_data and args.human_data_rounds > human_turn_counter:
+        if human_data and cfg.human_data_rounds > human_turn_counter:
             print(f"Using human data for user turn {i + 1}")
             for j, human_id in enumerate(sampled_human_ids):
                 if j < len(message_collection) and human_id in human_data:
@@ -578,14 +577,14 @@ def main():
         else:
             # Use model for all conversations
             message_collection = conversation.add_to_convo(
-                message_collection, model=PERSUADEE_MODEL, user_first=False, batch_size=args.batch_size
+                message_collection, model=PERSUADEE_MODEL, user_first=False, batch_size=cfg.batch_size
             )
 
         last_sampled = [conv[-1] for conv in message_collection]
         last_role = "assistant"
         # After sampling a response, record the conversation
         record_event.record_sampling_event(
-            args,
+            cfg,
             all_events,
             last_sampled,
             last_role,
@@ -597,7 +596,7 @@ def main():
         human_turn_counter += 1
 
         print("Processing Assistant Turn:", i + 1)
-        if human_data or args.human_data_rounds > human_turn_counter:
+        if human_data or cfg.human_data_rounds > human_turn_counter:
             system_message = []
             for afoa, sb, sc, cs in zip(
                 argue_for_or_against_list,
@@ -618,7 +617,7 @@ def main():
                         conspiracyRestatement=sc,
                     )
                 # prepend human data message if using human data
-                if human_data and args.human_data_rounds > human_turn_counter:
+                if human_data and cfg.human_data_rounds > human_turn_counter:
                     system_prompt = (
                         "Using human data for assistant turn: " + system_prompt
                     )
@@ -636,7 +635,7 @@ def main():
                         endorse_string2 if afoa == "for" else oppose_string2
                     ),
                     assistantPersuasionDegree=adp,
-                    evaluationScale=args.evaluation_scale - 1,
+                    evaluationScale=cfg.evaluation_scale - 1,
                 )
                 for afoa, sb, sc, adp, cntxt in zip(
                     argue_for_or_against_list,
@@ -651,7 +650,7 @@ def main():
             system_message,
         )
 
-        if human_data and args.human_data_rounds > human_turn_counter:
+        if human_data and cfg.human_data_rounds > human_turn_counter:
             print(f"Using human data for assistant turn {i + 1}")
             for j, human_id in enumerate(sampled_human_ids):
                 if j < len(message_collection) and human_id in human_data:
@@ -666,8 +665,8 @@ def main():
                 message_collection,
                 model=PERSUADER_MODEL,
                 postprocess_responses=JAILBREAK_TUNING_POSTPROCESS,
-                remove_ratings=args.remove_ratings,
-                batch_size=args.batch_size,
+                remove_ratings=cfg.remove_ratings,
+                batch_size=cfg.batch_size,
             )
 
         # Each assistant message = a new sampling event
@@ -675,7 +674,7 @@ def main():
         last_role = "user"
         # After sampling a response, record the conversation
         record_event.record_sampling_event(
-            args,
+            cfg,
             all_events,
             last_sampled,
             last_role,
@@ -729,7 +728,7 @@ def main():
 
     # NOTE: As well as the returned final_report, the results dict gets
     # a bunch of new values set in it which are calculated in calc_metrics
-    final_report = calc_metrics.calc_metrics(args, config, samples, results)
+    final_report = calc_metrics.calc_metrics(cfg, config, samples, results)
 
     filtered_ratings_by_turn = results["filtered_ratings_by_turn"]
     user_belief_ratings = results["user_belief_ratings"]
@@ -752,7 +751,7 @@ def main():
                     ],
                     "base_eval": "persuasion",
                     "run_config": experiment_config,
-                    "split": args.prompts_file,
+                    "split": cfg.prompts_file,
                     "created_by": "",
                     "created_at": timestamp_str,
                     "run_id": RUN_ID,
@@ -870,7 +869,7 @@ def main():
     write_log()
 
     # Visualizations are run with values in the results dict that are set from calc_metrics above
-    visualizations.create_visualizations(args, config, samples, results)
+    visualizations.create_visualizations(cfg, config, samples, results)
 
 
 if __name__ == "__main__":
