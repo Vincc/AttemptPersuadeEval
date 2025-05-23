@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 
 import argparse
-import os
-import json
 import glob
-import numpy as np
-import matplotlib.pyplot as plt
+import json
+import os
 from collections import defaultdict
-from typing import Dict, List, Tuple, Any
+from typing import Any, Dict, List, Tuple
+
+import matplotlib.pyplot as plt
+import numpy as np
 
 # Set font to a widely available serif font (with fallbacks)
 plt.rcParams["font.family"] = ["serif"]

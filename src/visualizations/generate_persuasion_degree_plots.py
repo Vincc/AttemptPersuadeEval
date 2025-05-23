@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-import os
-import json
 import argparse
-import numpy as np
-import matplotlib.pyplot as plt
 import glob
-import pandas as pd
+import json
+import os
 from pathlib import Path
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 from tabulate import tabulate
 
 
