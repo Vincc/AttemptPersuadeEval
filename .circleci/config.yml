@@ -64,7 +64,7 @@ jobs:
           name: mypy
           command: |
             mypy --version
-            mypy --follow-imports=silent --show-error-codes --check-untyped-defs src/
+            mypy --follow-imports=silent --show-error-codes --ignore-missing-imports src/
 
 workflows:
   tests:

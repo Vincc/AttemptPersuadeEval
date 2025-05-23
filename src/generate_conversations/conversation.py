@@ -1,4 +1,5 @@
 import asyncio
+from typing import Union
 
 from ..utils.utils import remove_rating_from_message
 from . import generate
@@ -6,7 +7,7 @@ from . import generate
 loop = asyncio.get_event_loop()
 
 
-def set_system_message(message_collection: list[list], message: str or list):
+def set_system_message(message_collection: list[list], message: Union[str, list]):
     if isinstance(message, str):
         for i, messages in enumerate(message_collection):
             if len(messages) > 0:

@@ -4,7 +4,7 @@ Generate new responses in parallel given collection of existing conversations.
 
 import asyncio
 import re
-from typing import Any, Dict, List
+from typing import Any, Dict, List, cast
 
 import torch
 from litellm import acompletion
@@ -148,18 +148,24 @@ def format_prompt_for_model(
     """
     # Handle Qwen models with thinking disabled
     if is_qwen_model(model):
-        return tokenizer.apply_chat_template(
-            messages,
-            tokenize=False,
-            add_generation_prompt=True,
-            enable_thinking=False,  # Disable thinking mode for Qwen
+        return cast(
+            str,
+            tokenizer.apply_chat_template(
+                messages,
+                tokenize=False,
+                add_generation_prompt=True,
+                enable_thinking=False,  # Disable thinking mode for Qwen
+            ),
         )
     else:
         # Default Llama formatting
-        return tokenizer.apply_chat_template(
-            messages,
-            tokenize=False,
-            add_generation_prompt=True,
+        return cast(
+            str,
+            tokenizer.apply_chat_template(
+                messages,
+                tokenize=False,
+                add_generation_prompt=True,
+            ),
         )
 
 
