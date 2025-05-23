@@ -1,0 +1,73 @@
+version: 2.1
+
+orbs:
+  python: circleci/python@1.5.0
+
+commands:
+  install-dependencies:
+    description: "Check out and update Python dependencies."
+    steps:
+      - checkout
+      - run:
+          name: Install APE project
+          command: |
+            pip install -e '.[dev,test]'
+
+  store-test-output:
+    description: "Store the output of tests."
+    steps:
+      - store_artifacts:
+          path: /tmp/test-reports
+          destination: test-reports
+
+      - store_test_results:
+          path: /tmp/test-reports
+
+      - store_artifacts:
+          path: /tmp/resource-usage
+          destination: resource-usage
+
+jobs:
+  pytest:
+    docker:
+      - image: cimg/python:3.11.7
+    steps:
+      - install-dependencies
+      - run:
+          name: Run tests
+          command: |
+            # Run the dummy test for now
+            python test.py
+            # When adding proper tests later, uncomment this:
+            # pytest --junitxml=/tmp/test-reports/junit.xml \
+            #   --durations=500 -vv src/
+          environment:
+            WANDB_MODE: offline
+      - store-test-output
+
+  lint:
+    docker:
+      - image: cimg/python:3.11.7
+    steps:
+      - install-dependencies
+      - run:
+          name: black
+          command: |
+            black --version
+            black . --check
+      - run:
+          name: isort
+          command: |
+            isort --version
+            isort src --check --verbose
+      - run:
+          name: mypy
+          command: |
+            mypy --version
+            mypy --follow-imports=silent --show-error-codes --check-untyped-defs src/
+
+workflows:
+  tests:
+    jobs:
+      - pytest
+      - lint

@@ -19,7 +19,8 @@ dependencies = [
     "transformers",
     "torch",
     "accelerate",
-    "tabulate"
+    "tabulate",
+    "hydra-core"
 ]
 
 [project.optional-dependencies]
