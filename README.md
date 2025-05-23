@@ -137,15 +137,15 @@ A number of scripts with pre-configured settings for persuasion evals for certai
 For example, to run all models multiple times and plot the aggregate results over the runs with error bars, run:
 
 ```bash
-bash exps/run_all_full_eval_hydra.sh
+bash exps/run_all_full_eval.sh
 ```
 
 Other available experiment scripts:
 ```bash
-bash exps/ablations/persuasion_degree_hydra.sh
-bash exps/ablations/persona_comparison_hydra.sh
-bash exps/ablations/run_10_turn_convo_hydra.sh
-bash exps/ablations/contexts_comparison_hydra.sh
+bash exps/ablations/persuasion_degree.sh
+bash exps/ablations/persona_comparison.sh
+bash exps/ablations/run_10_turn_convo.sh
+bash exps/ablations/contexts_comparison.sh
 ```
 
 ### Topics list
