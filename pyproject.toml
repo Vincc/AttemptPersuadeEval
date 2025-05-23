@@ -27,7 +27,8 @@ dependencies = [
 dev = [
     "black",
     "pre-commit",
-    "mypy"
+    "mypy",
+    "isort"
 ]
 test = [
     "pytest"
