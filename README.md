@@ -1,6 +1,10 @@
-# LLM Persuasion Evals
+# The Attempt to Persuade Eval (APE)
 
-![APE Persuasion](assets/APE_Persuasion.png)
+📄 **Paper**: [Attempt to Persuade Eval (APE)](https://www.arxiv.org/abs/2506.02873)
+
+<p align="center">
+  <img src="assets/APE_Persuasion.png" width="400">
+</p>
 
 ⚠️ **Content Warning**: This repository contains examples and discussions of sensitive and potentially distressing topics.
 
