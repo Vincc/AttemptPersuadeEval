@@ -10,6 +10,11 @@ import torch
 from litellm import acompletion
 from tqdm import tqdm
 from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+import logging
+
+# LiteLLM and httpx log each request at INFO level. Set logging level to WARNING
+logging.getLogger("LiteLLM").setLevel(logging.WARNING)
+logging.getLogger("httpx").setLevel(logging.WARNING)
 
 # Cache for storing loaded pipeline generators
 MODEL_CACHE = {}
