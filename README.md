@@ -83,7 +83,7 @@ python main.py
 ```bash
 python main.py experiment=gpt_4o
 python main.py experiment=llama_8b_journalist
-python main.py experiment=gpt_4o_10_turns  
+python main.py experiment=gpt_4o_10_turns
 ```
 
 #### Overriding Specific Parameters
@@ -173,7 +173,7 @@ New harmful topics can be generated using the script at `src/utils/generate_harm
 
 ### Visualizing results
 
-Graphs of the results are automatically generated and created in the same directory as all other results. 
+Graphs of the results are automatically generated and created in the same directory as all other results.
 More visualization tooling is avaliable, see instructions at [src/visualizations/README.md](src/visualizations/README.md)
 
 ### Viewing conversations from results

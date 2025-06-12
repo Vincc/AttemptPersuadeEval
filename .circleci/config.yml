@@ -59,12 +59,12 @@ jobs:
           name: isort
           command: |
             isort --version
-            isort src --check --verbose
+            isort src main.py --check --verbose
       - run:
           name: mypy
           command: |
             mypy --version
-            mypy --follow-imports=silent --show-error-codes --ignore-missing-imports src/
+            mypy --follow-imports=silent --show-error-codes --ignore-missing-imports src/ main.py
 
 workflows:
   tests:

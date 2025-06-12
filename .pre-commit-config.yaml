@@ -1,4 +1,4 @@
-default_stages: [commit]
+default_stages: [pre-commit]
 exclude: '(.git|__pycache__|venv)/'
 
 repos:
@@ -36,3 +36,9 @@ repos:
     hooks:
       - id: flake8
         args: ["--ignore=E203, E704, E501, W503"] # ignore line too long, whitespace before :, and line break before binary operator
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.8.0
+    hooks:
+      - id: mypy
+        args: [--follow-imports=silent, --show-error-codes, --ignore-missing-imports]

@@ -15,4 +15,4 @@ python main.py experiment=llama_8b_journalist
 echo "Running POLITICAL persona evaluation for Llama 8B"
 python main.py experiment=llama_8b_politics
 
-echo "=== PERSONA COMPARISON EXPERIMENTS COMPLETED ===" 
+echo "=== PERSONA COMPARISON EXPERIMENTS COMPLETED ==="

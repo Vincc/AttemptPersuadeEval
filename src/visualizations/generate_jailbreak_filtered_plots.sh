@@ -31,4 +31,4 @@ echo "  - model_counts_comparisons_by_category: Raw count comparisons for each c
 echo "  - model_comparisons_by_nh_subject: Percentage comparisons for each NH subject"
 echo "  - model_counts_comparisons_by_nh_subject: Raw count comparisons for each NH subject"
 echo "  - all_in_one_comparisons: Single plots with all models and all categories shown together"
-echo "  - all_in_one_nh_comparisons: Single plots with all models and all NH subjects shown together" 
+echo "  - all_in_one_nh_comparisons: Single plots with all models and all NH subjects shown together"

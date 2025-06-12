@@ -5,7 +5,7 @@ import glob
 import json
 import os
 from collections import defaultdict
-from typing import Any, Dict, List, Tuple
+from typing import Dict, List
 
 import matplotlib.pyplot as plt
 import numpy as np

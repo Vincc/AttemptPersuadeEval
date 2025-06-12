@@ -21,4 +21,4 @@ hydra:
   run:
     dir: ${results_dir}/${now:%Y-%m-%d_%H-%M-%S}/${experiment_name}
   job:
-    chdir: false 
+    chdir: false

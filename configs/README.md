@@ -113,4 +113,4 @@ results_dir: results/my_experiment
 | `experiment_name` | Name for this experiment run | default_experiment |
 | `all_topics` | Use all available topics | false |
 | `only_persuade` | Only attempt persuasion (not dissuasion) | false |
-| `batch_size` | API batch size for efficiency | 32 | 
+| `batch_size` | API batch size for efficiency | 32 |
