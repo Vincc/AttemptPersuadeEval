@@ -3,6 +3,7 @@ Generate new responses in parallel given collection of existing conversations.
 """
 
 import asyncio
+import logging
 import re
 from typing import Any, Dict, List, cast
 
@@ -10,7 +11,6 @@ import torch
 from litellm import acompletion
 from tqdm import tqdm
 from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
-import logging
 
 # LiteLLM and httpx log each request at INFO level. Set logging level to WARNING
 logging.getLogger("LiteLLM").setLevel(logging.WARNING)

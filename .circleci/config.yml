@@ -36,11 +36,7 @@ jobs:
       - run:
           name: Run tests
           command: |
-            # Run the dummy test for now
-            python test.py
-            # When adding proper tests later, uncomment this:
-            # pytest --junitxml=/tmp/test-reports/junit.xml \
-            #   --durations=500 -vv src/
+            pytest -v
           environment:
             WANDB_MODE: offline
       - store-test-output
