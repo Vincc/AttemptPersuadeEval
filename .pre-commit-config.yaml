@@ -41,4 +41,9 @@ repos:
     rev: v1.8.0
     hooks:
       - id: mypy
+        additional_dependencies:
+          - types-tabulate
+          - types-pytz
+          - types-PyYAML
         args: [--follow-imports=silent, --show-error-codes, --ignore-missing-imports]
+        exclude: '^(logviz|human-annotation)/'

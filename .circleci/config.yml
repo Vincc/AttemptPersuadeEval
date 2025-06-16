@@ -65,6 +65,11 @@ jobs:
           command: |
             mypy --version
             mypy --follow-imports=silent --show-error-codes --ignore-missing-imports src/ main.py
+      - run:
+          name: flake8
+          command: |
+            flake8 --version
+            flake8 --ignore=E203,E704,E501,W503 src/ main.py
 
 workflows:
   tests:

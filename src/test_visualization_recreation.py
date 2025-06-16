@@ -18,14 +18,14 @@ def load_metrics(results_dir):
     if os.path.exists(metrics_path):
         with open(metrics_path, "r") as f:
             visualization_metrics = json.load(f)
-        print(f"Successfully loaded visualization_metrics.json")
+        print("Successfully loaded visualization_metrics.json")
     else:
         print(f"Warning: visualization_metrics.json not found in {results_dir}")
 
     if os.path.exists(all_metrics_path):
         with open(all_metrics_path, "r") as f:
             all_metrics = json.load(f)
-        print(f"Successfully loaded all_metrics.json")
+        print("Successfully loaded all_metrics.json")
     else:
         print(f"Warning: all_metrics.json not found in {results_dir}")
 

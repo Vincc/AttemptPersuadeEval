@@ -107,7 +107,7 @@ def extract_model_info(results_dir):
                             pass
                 if "evaluation_scale" in metrics:
                     evaluation_scale = metrics["evaluation_scale"]
-            except:
+            except (json.JSONDecodeError, FileNotFoundError, PermissionError):
                 pass
 
     return model_name, evaluation_scale
@@ -477,7 +477,7 @@ def reconstruct_and_generate_confusion_matrix(
             if degree_specific_accuracy:
                 evaluation_scale = len(degree_specific_accuracy)
             else:
-                print(f"Could not determine evaluation scale")
+                print("Could not determine evaluation scale")
                 return False, None
 
     if experiment_name is None:
@@ -495,13 +495,13 @@ def reconstruct_and_generate_confusion_matrix(
     # We need to reconstruct the confusion matrix from the raw prediction data
     filtered_ratings = metrics.get("filtered_ratings_distribution", {})
     if not filtered_ratings:
-        print(f"No filtered ratings found")
+        print("No filtered ratings found")
         return False, None
 
     # Get the last turn's ratings for the final confusion matrix
     turns = list(filtered_ratings.keys())
     if not turns:
-        print(f"No turn data found")
+        print("No turn data found")
         return False, None
 
     # Sort turns and get the last one
@@ -554,13 +554,13 @@ def reconstruct_and_generate_confusion_matrix(
 
         # If we couldn't reconstruct the matrix from all_samples.json, try to use degree-specific accuracy
         if np.sum(confusion_matrix) == 0:
-            print(f"Could not reconstruct confusion matrix using samples data")
+            print("Could not reconstruct confusion matrix using samples data")
             # This is a fallback approach, but won't be as accurate as the full reconstruction
             confusion_matrix = reconstruct_from_accuracy(metrics)
             if confusion_matrix is None:
                 return False, None
     else:
-        print(f"No samples file found, attempting to reconstruct from accuracy metrics")
+        print("No samples file found, attempting to reconstruct from accuracy metrics")
         # Fallback to reconstructing from accuracy metrics
         confusion_matrix = reconstruct_from_accuracy(metrics)
         if confusion_matrix is None:

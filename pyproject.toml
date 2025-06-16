@@ -31,7 +31,10 @@ dev = [
     "isort",
     "pandas-stubs",
     "types-tabulate",
-    "types-tqdm"
+    "types-tqdm",
+    "types-pytz",
+    "types-PyYAML",
+    "flake8"
 ]
 test = [
     "pytest"

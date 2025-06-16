@@ -5,7 +5,7 @@ import glob
 import json
 import os
 from collections import defaultdict
-from typing import Dict, List
+from typing import Any, Dict, List, Set
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -155,12 +155,13 @@ def find_model_runs(
     return {k: v for k, v in model_runs.items() if len(v) > 0}
 
 
-def load_metrics(model_dir: str) -> Dict:
-    """Load visualization metrics from a model run directory."""
+def load_metrics(model_dir: str) -> Dict[str, Any] | None:
+    """Load metrics from a model directory."""
     metrics_file = os.path.join(model_dir, "visualization_metrics.json")
     if os.path.exists(metrics_file):
         with open(metrics_file, "r") as f:
-            return json.load(f)
+            metrics: Dict[str, Any] = json.load(f)
+            return metrics
     return None
 
 
@@ -178,7 +179,9 @@ def aggregate_metrics_by_category(model_runs: Dict[str, List[str]]) -> Dict[str,
 
     for model_name, run_dirs in model_runs.items():
         print(f"Processing model: {model_name} ({len(run_dirs)} runs)")
-        model_data = defaultdict(lambda: defaultdict(dict))
+        model_data: Dict[int, Dict[str, Dict[str, List[float]]]] = defaultdict(
+            lambda: defaultdict(dict)
+        )
 
         # Collect data across runs
         for run_dir in run_dirs:
@@ -254,7 +257,9 @@ def aggregate_metrics_by_nh_subjects(
 
     for model_name, run_dirs in model_runs.items():
         print(f"Processing NH subjects for model: {model_name}")
-        model_data = defaultdict(lambda: defaultdict(dict))
+        model_data: Dict[int, Dict[str, Dict[str, List[float]]]] = defaultdict(
+            lambda: defaultdict(dict)
+        )
 
         # Collect data across runs
         for run_dir in run_dirs:
@@ -759,14 +764,14 @@ def create_percentage_plots(
             width = 0.8
 
             # Create stacked bars (without error bars initially)
-            bars1 = ax.bar(
+            ax.bar(
                 x,
                 with_attempt_means,
                 width,
                 label="With Persuasion Attempt",
                 color="skyblue",
             )
-            bars2 = ax.bar(
+            ax.bar(
                 x,
                 no_attempt_means,
                 width,
@@ -777,7 +782,7 @@ def create_percentage_plots(
 
             # Calculate the bottom position for the third bar
             bottom_vals = np.array(with_attempt_means) + np.array(no_attempt_means)
-            bars3 = ax.bar(
+            ax.bar(
                 x,
                 refusal_means,
                 width,
@@ -920,16 +925,16 @@ def create_multi_model_comparison(
     os.makedirs(output_dir, exist_ok=True)
 
     # Get all unique categories across all models
-    all_categories = set()
+    all_categories: Set[str] = set()
     for model_data in aggregated_data.values():
         for turn_data in model_data.values():
             all_categories.update(turn_data.keys())
 
-    all_categories = sorted(all_categories)
+    all_categories_list = sorted(list(all_categories))
 
     # For each turn and category, create a model comparison plot
     for turn_idx in range(1, max_turns + 1):
-        for category in all_categories:
+        for category in all_categories_list:
             # Collect data for this category and turn across models
             models = []
             percentages = []
@@ -1013,16 +1018,16 @@ def create_category_model_comparison_plots(
     os.makedirs(comparison_dir, exist_ok=True)
 
     # Get all unique categories across all models
-    all_categories = set()
+    all_categories: Set[str] = set()
     for model_data in aggregated_data.values():
         for turn_data in model_data.values():
             all_categories.update(turn_data.keys())
 
-    all_categories = sorted(all_categories)
+    all_categories_list = sorted(list(all_categories))
 
     # For each turn and category, create a model comparison plot
     for turn_idx in range(1, max_turns + 1):
-        for category in all_categories:
+        for category in all_categories_list:
             # Get models that have data for this category and turn
             valid_models = []
 
@@ -1084,14 +1089,14 @@ def create_category_model_comparison_plots(
                 refusal_stds.append(np.std(refusal_percentages))
 
             # Create stacked bars
-            bars1 = ax.bar(
+            ax.bar(
                 x,
                 with_attempt_means,
                 width,
                 label="With Persuasion Attempt",
                 color="skyblue",
             )
-            bars2 = ax.bar(
+            ax.bar(
                 x,
                 no_attempt_means,
                 width,
@@ -1102,7 +1107,7 @@ def create_category_model_comparison_plots(
 
             # Calculate the bottom position for the third bar
             bottom_vals = np.array(with_attempt_means) + np.array(no_attempt_means)
-            bars3 = ax.bar(
+            ax.bar(
                 x,
                 refusal_means,
                 width,
@@ -1203,16 +1208,16 @@ def create_nh_subject_model_comparison_plots(
     os.makedirs(comparison_dir, exist_ok=True)
 
     # Get all unique subjects across all models
-    all_subjects = set()
+    all_subjects: Set[str] = set()
     for model_data in aggregated_data.values():
         for turn_data in model_data.values():
             all_subjects.update(turn_data.keys())
 
-    all_subjects = sorted(all_subjects)
+    all_subjects_list = sorted(list(all_subjects))
 
     # For each turn and subject, create a model comparison plot
     for turn_idx in range(1, max_turns + 1):
-        for subject in all_subjects:
+        for subject in all_subjects_list:
             # Get models that have data for this subject and turn
             valid_models = []
 
@@ -1274,14 +1279,14 @@ def create_nh_subject_model_comparison_plots(
                 refusal_stds.append(np.std(refusal_percentages))
 
             # Create stacked bars
-            bars1 = ax.bar(
+            ax.bar(
                 x,
                 with_attempt_means,
                 width,
                 label="With Persuasion Attempt",
                 color="skyblue",
             )
-            bars2 = ax.bar(
+            ax.bar(
                 x,
                 no_attempt_means,
                 width,
@@ -1292,7 +1297,7 @@ def create_nh_subject_model_comparison_plots(
 
             # Calculate the bottom position for the third bar
             bottom_vals = np.array(with_attempt_means) + np.array(no_attempt_means)
-            bars3 = ax.bar(
+            ax.bar(
                 x,
                 refusal_means,
                 width,
@@ -1393,16 +1398,16 @@ def create_category_counts_model_comparison_plots(
     os.makedirs(comparison_dir, exist_ok=True)
 
     # Get all unique categories across all models
-    all_categories = set()
+    all_categories: Set[str] = set()
     for model_data in aggregated_data.values():
         for turn_data in model_data.values():
             all_categories.update(turn_data.keys())
 
-    all_categories = sorted(all_categories)
+    all_categories_list = sorted(list(all_categories))
 
     # For each turn and category, create a model comparison plot
     for turn_idx in range(1, max_turns + 1):
-        for category in all_categories:
+        for category in all_categories_list:
             # Get models that have data for this category and turn
             valid_models = []
 
@@ -1448,14 +1453,14 @@ def create_category_counts_model_comparison_plots(
                 refusal_stds.append(np.std(category_data["refusal"]))
 
             # Create stacked bars
-            bars1 = ax.bar(
+            ax.bar(
                 x,
                 with_attempt_means,
                 width,
                 label="With Persuasion Attempt",
                 color="skyblue",
             )
-            bars2 = ax.bar(
+            ax.bar(
                 x,
                 no_attempt_means,
                 width,
@@ -1466,7 +1471,7 @@ def create_category_counts_model_comparison_plots(
 
             # Calculate the bottom position for the third bar
             bottom_vals = np.array(with_attempt_means) + np.array(no_attempt_means)
-            bars3 = ax.bar(
+            ax.bar(
                 x,
                 refusal_means,
                 width,
@@ -1581,16 +1586,16 @@ def create_nh_subject_counts_model_comparison_plots(
     os.makedirs(comparison_dir, exist_ok=True)
 
     # Get all unique subjects across all models
-    all_subjects = set()
+    all_subjects: Set[str] = set()
     for model_data in aggregated_data.values():
         for turn_data in model_data.values():
             all_subjects.update(turn_data.keys())
 
-    all_subjects = sorted(all_subjects)
+    all_subjects_list = sorted(list(all_subjects))
 
     # For each turn and subject, create a model comparison plot
     for turn_idx in range(1, max_turns + 1):
-        for subject in all_subjects:
+        for subject in all_subjects_list:
             # Get models that have data for this subject and turn
             valid_models = []
 
@@ -1636,14 +1641,14 @@ def create_nh_subject_counts_model_comparison_plots(
                 refusal_stds.append(np.std(subject_data["refusal"]))
 
             # Create stacked bars
-            bars1 = ax.bar(
+            ax.bar(
                 x,
                 with_attempt_means,
                 width,
                 label="With Persuasion Attempt",
                 color="skyblue",
             )
-            bars2 = ax.bar(
+            ax.bar(
                 x,
                 no_attempt_means,
                 width,
@@ -1654,7 +1659,7 @@ def create_nh_subject_counts_model_comparison_plots(
 
             # Calculate the bottom position for the third bar
             bottom_vals = np.array(with_attempt_means) + np.array(no_attempt_means)
-            bars3 = ax.bar(
+            ax.bar(
                 x,
                 refusal_means,
                 width,
@@ -1772,15 +1777,12 @@ def create_all_in_one_comparison_plot(
     os.makedirs(comparison_dir, exist_ok=True)
 
     # Get all unique categories across all models
-    all_categories = set()
+    all_categories: Set[str] = set()
     for model_data in aggregated_data.values():
         for turn_data in model_data.values():
             all_categories.update(turn_data.keys())
 
-    all_categories = sorted(all_categories)
-
-    # Define a pure gray color for response type legend
-    gray_color = (0.5, 0.5, 0.5)  # RGB gray color
+    all_categories_list = sorted(list(all_categories))
 
     # For each turn, create a combined comparison plot
     for turn_idx in range(1, max_turns + 1):
@@ -1789,7 +1791,7 @@ def create_all_in_one_comparison_plot(
         valid_categories = []
 
         # First, find valid categories with at least one model having data
-        for category in all_categories:
+        for category in all_categories_list:
             has_valid_data = False
             for model_name, model_data in aggregated_data.items():
                 if turn_idx in model_data and category in model_data[turn_idx]:
@@ -1933,7 +1935,7 @@ def create_all_in_one_comparison_plot(
 
             # Plot bars for this model - using the new color scheme with switched positions
             # 1. Attempt bars (bottom segment) - solid base color
-            bars1 = ax.bar(
+            ax.bar(
                 model_positions,
                 with_attempt_values,
                 bar_width,
@@ -1945,7 +1947,7 @@ def create_all_in_one_comparison_plot(
 
             # 2. No attempt bars (middle segment) - lighter shade
             bottom_vals1 = np.array(with_attempt_values)
-            bars2 = ax.bar(
+            ax.bar(
                 model_positions,
                 no_attempt_values,
                 bar_width,
@@ -1958,7 +1960,7 @@ def create_all_in_one_comparison_plot(
 
             # 3. Refusal bars (top segment) - light fill, solid edge
             bottom_vals2 = bottom_vals1 + np.array(no_attempt_values)
-            bars3 = ax.bar(
+            ax.bar(
                 model_positions,
                 refusal_values,
                 bar_width,
@@ -2146,15 +2148,12 @@ def create_all_in_one_nh_subject_comparison_plot(
     os.makedirs(comparison_dir, exist_ok=True)
 
     # Get all unique subjects across all models
-    all_subjects = set()
+    all_subjects: Set[str] = set()
     for model_data in aggregated_data.values():
         for turn_data in model_data.values():
             all_subjects.update(turn_data.keys())
 
-    all_subjects = sorted(all_subjects)
-
-    # Define a pure gray color for response type legend
-    gray_color = (0.5, 0.5, 0.5)  # RGB gray color
+    all_subjects_list = sorted(list(all_subjects))
 
     # For each turn, create a combined comparison plot
     for turn_idx in range(1, max_turns + 1):
@@ -2163,7 +2162,7 @@ def create_all_in_one_nh_subject_comparison_plot(
         valid_subjects = []
 
         # First, find valid subjects with at least one model having data
-        for subject in all_subjects:
+        for subject in all_subjects_list:
             has_valid_data = False
             for model_name, model_data in aggregated_data.items():
                 if turn_idx in model_data and subject in model_data[turn_idx]:
@@ -2307,7 +2306,7 @@ def create_all_in_one_nh_subject_comparison_plot(
 
             # Plot bars for this model - using the new color scheme with switched positions
             # 1. Attempt bars (bottom segment) - solid base color
-            bars1 = ax.bar(
+            ax.bar(
                 model_positions,
                 with_attempt_values,
                 bar_width,
@@ -2319,7 +2318,7 @@ def create_all_in_one_nh_subject_comparison_plot(
 
             # 2. No attempt bars (middle segment) - lighter shade
             bottom_vals1 = np.array(with_attempt_values)
-            bars2 = ax.bar(
+            ax.bar(
                 model_positions,
                 no_attempt_values,
                 bar_width,
@@ -2332,7 +2331,7 @@ def create_all_in_one_nh_subject_comparison_plot(
 
             # 3. Refusal bars (top segment) - light fill, solid edge
             bottom_vals2 = bottom_vals1 + np.array(no_attempt_values)
-            bars3 = ax.bar(
+            ax.bar(
                 model_positions,
                 refusal_values,
                 bar_width,
