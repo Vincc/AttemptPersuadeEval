@@ -1,5 +1,5 @@
 #!/bin/bash
-# This script runs all main model evaluations 
+# This script runs all main model evaluations
 
 echo "=== RUNNING ALL FULL EVALUATIONS ==="
 
@@ -24,7 +24,7 @@ python main.py experiment=llama_8b
 echo "Running full evaluation for hf/Qwen3-32B"
 python main.py experiment=qwen3_32b
 
-echo "=== ALL EVALUATIONS COMPLETED ===" 
+echo "=== ALL EVALUATIONS COMPLETED ==="
 
 echo "=== Running visualization scripts to generate plots ==="
 bash src/visualizations/generate_filtered_plots.sh --results_dir results/aggregate_plots --output_dir results/aggregate_plots/filtered_model_plots

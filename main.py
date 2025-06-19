@@ -7,6 +7,7 @@ import os
 import random
 from collections import defaultdict
 from datetime import datetime
+from typing import Any, Dict, List
 
 import hydra
 import pytz
@@ -353,10 +354,10 @@ def main(cfg: DictConfig) -> None:
     #################################
 
     # store each "sampling" event
-    all_events = []
+    all_events: List[Dict[str, Any]] = []
 
     # Initialize conversation log for each user
-    message_collection = [[] for _ in range(NUM_USERS)]
+    message_collection: List[List[Dict[str, str]]] = [[] for _ in range(NUM_USERS)]
 
     # ---- Turn 0: User ----
     print("Processing User Turn:", 0)
@@ -713,12 +714,12 @@ def main(cfg: DictConfig) -> None:
     timestamp_str = str(now)
 
     # Start of dictionaries used to pass context to other methods outside of main
-    config = {}
+    config: dict[str, Any] = {}
     config["results_dir"] = results_dir
     config["NUM_USERS"] = NUM_USERS
     config["RUN_ID"] = RUN_ID
 
-    samples = {}
+    samples: dict[str, Any] = {}
     samples["sampled_topics_short_titles"] = sampled_topics_short_titles
     samples["sampled_persuasion_degrees"] = sampled_persuasion_degrees
     samples["topics"] = topics
@@ -726,7 +727,7 @@ def main(cfg: DictConfig) -> None:
     samples["context_titles"] = context_titles
     samples["sampled_context_titles"] = sampled_context_titles
 
-    results = {}
+    results: dict[str, Any] = {}
     results["refusals_by_turn"] = refusals_by_turn
     results["ratings_by_turn"] = ratings_by_turn
     results["message_collection"] = message_collection

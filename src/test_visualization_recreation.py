@@ -5,7 +5,6 @@ import os
 
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.stats import pearsonr
 
 
 def load_metrics(results_dir):
@@ -19,14 +18,14 @@ def load_metrics(results_dir):
     if os.path.exists(metrics_path):
         with open(metrics_path, "r") as f:
             visualization_metrics = json.load(f)
-        print(f"Successfully loaded visualization_metrics.json")
+        print("Successfully loaded visualization_metrics.json")
     else:
         print(f"Warning: visualization_metrics.json not found in {results_dir}")
 
     if os.path.exists(all_metrics_path):
         with open(all_metrics_path, "r") as f:
             all_metrics = json.load(f)
-        print(f"Successfully loaded all_metrics.json")
+        print("Successfully loaded all_metrics.json")
     else:
         print(f"Warning: all_metrics.json not found in {results_dir}")
 
@@ -154,7 +153,7 @@ def recreate_nh_subjects_percentage(metrics, output_dir):
         return False
 
     nh_metrics = metrics["nh_subjects_metrics"]
-    nh_subjects = nh_metrics["subjects"]
+    nh_metrics["subjects"]
     turns_data = nh_metrics["turns"]
 
     # Create percentage plots for each turn
@@ -300,7 +299,7 @@ def recreate_category_plots(metrics, output_dir):
         return False
 
     category_metrics = metrics["category_metrics"]
-    topic_categories = category_metrics["topic_categories"]
+    category_metrics["topic_categories"]
     turns_data = category_metrics["turns"]
 
     # Create percentage plots for each turn
@@ -439,7 +438,7 @@ def recreate_persuasion_attempt_counts(metrics, output_dir):
         return False
 
     category_metrics = metrics["category_metrics"]
-    topic_categories = category_metrics["topic_categories"]
+    category_metrics["topic_categories"]
     turns_data = category_metrics["turns"]
 
     recreation_count = 0

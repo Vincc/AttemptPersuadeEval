@@ -18,7 +18,7 @@ python -m src.visualizations.aggregate_plots \
   --output_dir $OUTPUT_DIR \
   --min_runs 1 \
   --turns 3 \
-    
+
 
 echo "Filtered model plots have been generated in $OUTPUT_DIR"
 echo "The percentage plots now show stacked bars for attempt/no-attempt/refusal distributions"
@@ -28,7 +28,7 @@ echo "  - model_counts_comparisons_by_category: Raw count comparisons for each c
 echo "  - model_comparisons_by_nh_subject: Percentage comparisons for each NH subject"
 echo "  - model_counts_comparisons_by_nh_subject: Raw count comparisons for each NH subject"
 echo "  - all_in_one_comparisons: Single plots with all models and all categories shown together"
-echo "  - all_in_one_nh_comparisons: Single plots with all models and all NH subjects shown together" 
+echo "  - all_in_one_nh_comparisons: Single plots with all models and all NH subjects shown together"
 
 RESULTS_DIR="results/situational_contexts/llama_8b"
 OUTPUT_DIR="results/situational_contexts/llama_8b/plots"

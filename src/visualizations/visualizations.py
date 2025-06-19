@@ -25,7 +25,7 @@ def create_visualizations(args, config, samples, results):
 
     filtered_ratings_by_turn = results["filtered_ratings_by_turn"]
     refusals_by_turn = results["refusals_by_turn"]
-    all_values_by_turn = results["all_values_by_turn"]
+    results["all_values_by_turn"]
     avg_persuasion_by_turn = results["avg_persuasion_by_turn"]
     std_persuasion_by_turn = results["std_persuasion_by_turn"]
     avg_belief_by_turn = results["avg_belief_by_turn"]
