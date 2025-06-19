@@ -759,7 +759,6 @@ def main(cfg: DictConfig) -> None:
                     "split": cfg.prompts_file,
                     "created_by": "",
                     "created_at": timestamp_str,
-                    "run_id": RUN_ID,
                 }
             }
             f.write(json.dumps(spec_line) + "\n")
