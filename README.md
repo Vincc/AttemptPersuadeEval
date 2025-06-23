@@ -53,7 +53,7 @@ When using huggingface models, make sure you download the checkpoints to src/ckp
 
 ### Install dependencies
 
-Dependencies are in `pyproject.toml`, install them for example with:
+Dependencies are in `pyproject.toml`, install them with:
 
 ```bash
 pip install -e ".[dev,test]"
@@ -96,7 +96,7 @@ python main.py persuader_model=gpt-4o-mini sample_belief_upper=50 all_topics=fal
 
 Pre-configured experiments include:
 
-- **Model Evaluations**: `gpt_4o`, `gpt_4o_mini`, `llama_8b`, `gemini_25_pro`, `qwen3_32b`
+- **Model Evaluations**: `gpt_4o`, `gpt_4o_mini`, `llama_8b`, `gemini_25_pro`, `gemini_flash_001`, `qwen3_32b`
 - **Persona Experiments**: `gpt_4o_journalist`, `gpt_4o_politics`, `llama_8b_journalist`
 - **Long Conversations**: `gpt_4o_10_turns`, `llama_8b_10_turns`
 - **Persuasion Degrees**: `gpt_4o_2_degree`, `gpt_4o_3_degree`, `gpt_4o_100_degree`
@@ -115,7 +115,7 @@ See `configs/README.md` for a complete list and detailed configuration options.
 | `experiment_name` | Name for this experiment run | default_experiment |
 | `all_topics` | Use all 600 available topics | true |
 | `only_persuade` | Only attempt persuasion (not dissuasion) | false |
-| `batch_size` | API batch size for efficiency | 32 |
+| `batch_size` | Local model batch size | 32 |
 
 ### Models
 
@@ -124,7 +124,7 @@ A list of models that can be used as the persuader are as follows:
 - `gpt-4o`: OpenAI GPT-4 model
 - `gpt-4o-mini`: Smaller version of GPT-4
 - `vertex_ai/gemini-2.0-flash-001`: Google's Gemini 2.0 Flash model
-- `vertex_ai/gemini-2.0-flash-lite-001`: Lightweight version of Gemini 2.0 Flash
+- `vertex_ai/gemini-2.5-pro-preview-03-25`: Google's Gemini 2.5 Pro model
 - `hf/Meta-Llama-3.1-8B-Instruct`: Meta's Llama 3.1 8B instruction-tuned model
 - `hf/Qwen3-32B-Instruct`: Qwen 3 32B instruction-tuned model
 
@@ -133,6 +133,10 @@ Note, we include the ability to use several open-weight models through the Huggi
 ```bash
 huggingface-cli download Qwen/Qwen3-32B-Instruct --local-dir src/ckpts/Qwen3-32B-Instruct --local-dir-use-symlinks False
 ```
+
+#### Adding new models
+
+To add more models you will need to modify `src/generate_conversations/generate.py` to ensure the appropriate sampling format is used with your model. For API calls, you should modify the `generate_llm` function while for local models, modify the `generate_with_local_model` function  as well as any other model-specific formatting. Additionally, for local models, download the checkpoints to `src/ckpts` and ensure the `preload_local_model` function loads your new model correctly. For visualizations, you can simply add your new model name to the dicts at the top of `src/visualizations/aggregate_plots.py` to order the models and ensure they have the right display names. 
 
 ### Experiment scripts
 
@@ -167,7 +171,9 @@ The default topics file can be found at `src/topics/diverse_topics.jsonl` which 
 ]
 ```
 
-New harmful topics can be generated using the script at `src/utils/generate_harmful_texts.py`
+#### Adding new Topics
+
+To add new topics to the persuasion conversations, simply add a new line in [src/topics/diverse_topics.jsonl](src/topics/diverse_topics.jsonl). This includes a `category`, `short_title`, `text`, and `subject`. Alternatively, you can create your own topic list via a `.jsonl` file with the above keys in the `src/topics/` directory and then adjusting the `topics_file` parameter to point to it. New harmful topics can be generated using the script at `src/utils/generate_harmful_texts.py`, but note that for the harmful topics used in the paper, we use a currently unreleased jailbroken model, but provide this script anyway which can be used with an OpenAI models. 
 
 ## Results
 
