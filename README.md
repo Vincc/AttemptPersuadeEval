@@ -34,9 +34,11 @@ To get authentication for running Gemini (Vertex AI), run the following in termi
 gcloud auth application-default login
 ```
 
-Also, you'll need to set the following env vars from the GCP Vertex project
-VERTEXAI_PROJECT=""
-VERTEXAI_LOCATION=""
+Also, you'll need to set the following env vars from the GCP Vertex project:
+
+```VERTEXAI_PROJECT=""```
+
+```VERTEXAI_LOCATION=""```
 
 When running the fine-tuned model, use e.g.: `persuader_model=vertex_ai/<VERTEXAI_ENDPOINTID>`
 
@@ -45,7 +47,7 @@ You can get a Hugging Face API key by creating an account on the Hugging Face we
 and then going to your account settings. Once you have your API key, either add the
 path to the `.env` file or set the `HF_TOKEN` environment variable in the .env file:
 
-HF_TOKEN="hf_..."
+```HF_TOKEN="hf_..."```
 
 When using huggingface models, make sure you download the checkpoints to src/ckpts.
 
@@ -60,6 +62,8 @@ pip install -e ".[dev,test]"
 ```
 
 ### Execute evals
+
+⚠️ **Cost Warning**: Running main.py makes API calls to various model providers. Some models are expensive to run on our eval - please double check prices before running any experiments!
 
 To run the persuasion attempt eval, use the following command:
 
@@ -180,7 +184,7 @@ To add new topics to the persuasion conversations, simply add a new line in [src
 ### Visualizing results
 
 Graphs of the results are automatically generated and created in the same directory as all other results.
-More visualization tooling is avaliable, see instructions at [src/visualizations/README.md](src/visualizations/README.md)
+More visualization tooling is available, see instructions at [src/visualizations/README.md](src/visualizations/README.md)
 
 ### Viewing conversations from results
 
