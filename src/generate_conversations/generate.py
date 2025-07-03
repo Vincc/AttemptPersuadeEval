@@ -391,10 +391,6 @@ async def generate_llm(
                     "temperature": temperature,
                 }
 
-                # Check if model is a Vertex AI finetuned model with numeric ID
-                if model.startswith("vertex_ai/") and model.split("/")[1].isdigit():
-                    completion_args["base_model"] = "vertex_ai/gemini-2.0-flash-001"
-
                 completion = await acompletion(**completion_args)
                 return completion.choices[0].message.content
             except Exception as e:
