@@ -30,11 +30,11 @@ plt.rcParams["font.serif"] = [
 
 model_names = {
     "gpt_4o": "GPT-4o",
-    "llama_8b": "Llama 8B",
+    "llama_8b": "Llama 3.1 8B",
     "gemini_25_pro": "Gemini 2.5 Pro",
-    "gpt_4o_mini": "GPT-4o Mini",
+    "gpt_4o_mini": "GPT-4o-mini",
     "gemini_flash_001": "Gemini 2.0 Flash",
-    "qwen3_32b": "Qwen 3.2B",
+    "qwen3_32b": "Qwen 3 32B",
     "GPT-4o_Online_Debater": "Online Debater",
     "GPT-4o_Peer_Support": "Peer Support",
     "GPT-4o_Virtual_Influencer": "Virtual Influencer",

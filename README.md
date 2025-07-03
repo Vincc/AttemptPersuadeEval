@@ -34,11 +34,17 @@ To get authentication for running Gemini (Vertex AI), run the following in termi
 gcloud auth application-default login
 ```
 
-Also, you'll need to set the following env vars from the GCP Vertex project:
+Also, you'll need to set the following `.env` vars from the GCP Vertex project:
 
 ```VERTEXAI_PROJECT=""```
 
 ```VERTEXAI_LOCATION=""```
+
+You can see the full list of models and appropriate locations to use [at this link](https://cloud.google.com/vertex-ai/generative-ai/docs/learn/locations). For example, if you are using the `Gemini 2.5 Flash` model and live in the USA, you could use:
+
+```VERTEXAI_PROJECT=my-project```
+
+```VERTEXAI_LOCATION=us-east5```
 
 When running the fine-tuned model, use e.g.: `persuader_model=vertex_ai/<VERTEXAI_ENDPOINTID>`
 
@@ -49,7 +55,12 @@ path to the `.env` file or set the `HF_TOKEN` environment variable in the .env f
 
 ```HF_TOKEN="hf_..."```
 
-When using huggingface models, make sure you download the checkpoints to src/ckpts.
+When using huggingface models, make sure you download the checkpoints to src/ckpts. To download the huggingface (hf) model weights, you can use the huggingface-cli downloader and download them to `src/ckpts`, for example:
+
+```bash
+huggingface-cli download Qwen/Qwen3-32B-Instruct --local-dir src/ckpts/Qwen3-32B-Instruct --local-dir-use-symlinks False
+```
+
 
 ## Running evals
 
@@ -73,6 +84,9 @@ python main.py persuader_model=gpt-4o
 
 This will run the persuasion evals using the `gpt-4o` model. This eval simulates a
 conversation between a user (i.e., roleplaying persuadee model) and a model (persuader), where the model is prompted to try to persuade the user into/out of a certain statement over three conversational rounds; the 600 different statements used in APE can be found in [src/topics/diverse_topics.jsonl](src/topics/diverse_topics.jsonl). The eval will output, to the 'results' directory, a JSON file containing the following information: the dialogue between the user and the model, an evaluator model's score for the persuasion attempt, and an evaluator model's score for the success of persuasion.
+
+Running main.py produces several figures and saves results to enable further analysis. The main
+figures to look at are `persuasion_attempt_counts_turn_n.png` and `nh_subjects_attempt_counts_turn_n.png` which show the number of persuasion attempts vs. no attempts vs. refusals across all categories, and harmful categories, respectively, for turn `n`. We also show these plots as percentages, changes in the self-reported user belief, and evaluator confusion matrix of prompted vs. predicted persuasion degree (see Figure 6 in the paper for more details). 
 
 ### Configuration
 
@@ -117,7 +131,7 @@ See `configs/README.md` for a complete list and detailed configuration options.
 | `persuadee_model` | Model playing persuadee role | gpt-4o |
 | `evaluator_model` | Model evaluating conversations | gpt-4o |
 | `experiment_name` | Name for this experiment run | default_experiment |
-| `all_topics` | Use all 600 available topics | true |
+| `all_topics` | Use all 600 available topics (else num_users topics are randomly selected) | true |
 | `only_persuade` | Only attempt persuasion (not dissuasion) | false |
 | `batch_size` | Local model batch size | 32 |
 
@@ -132,15 +146,15 @@ A list of models that can be used as the persuader are as follows:
 - `hf/Meta-Llama-3.1-8B-Instruct`: Meta's Llama 3.1 8B instruction-tuned model
 - `hf/Qwen3-32B-Instruct`: Qwen 3 32B instruction-tuned model
 
-Note, we include the ability to use several open-weight models through the Huggingface library. To download the huggingface (hf) model weights, you can use the huggingface-cli downloader and download them to `src/ckpts`, for example:
-
-```bash
-huggingface-cli download Qwen/Qwen3-32B-Instruct --local-dir src/ckpts/Qwen3-32B-Instruct --local-dir-use-symlinks False
-```
-
 #### Adding new models
 
-To add more models you will need to modify `src/generate_conversations/generate.py` to ensure the appropriate sampling format is used with your model. For API calls, you should modify the `generate_llm` function while for local models, modify the `generate_with_local_model` function  as well as any other model-specific formatting. Additionally, for local models, download the checkpoints to `src/ckpts` and ensure the `preload_local_model` function loads your new model correctly. For visualizations, you can simply add your new model name to the dicts at the top of `src/visualizations/aggregate_plots.py` to order the models and ensure they have the right display names. 
+To add more models you will need to modify `src/generate_conversations/generate.py` to ensure the appropriate sampling format is used with your model. 
+
+(1) API Models: For API calls, you should modify the `process_messages` function defined inside the `generate_llm` function. You should make sure that the model can be accessed through the [LiteLLM library](https://docs.litellm.ai/docs/) which is used in this repo for making API calls.
+
+(2) Local Models: For local models, First, download the checkpoints to `src/ckpts` and ensure the [`preload_local_model`](src/generate_conversations/generate.py#L33) function loads your new model correctly. Then, either use models from Huggingface and prepend `hf/` to the model name, or modify [this line](src/generate_conversations/generate.py#L375) to ensure it uses a custom local generation function. The easiest way to sample from a new model is to modify [`generate_with_local_model`](src/generate_conversations/generate.py#L209) to include the new model [in this if statement](src/generate_conversations/generate.py#L311). As well, you should define any required pre- or post-processing formatting for the new model, e.g., like for [the Qwen 3 model here](src/generate_conversations/generate.py#L102) and [here](src/generate_conversations/generate.py#L140). 
+
+(3) Visualizations: To include new models in the aggregate visualizations that compare various models after running them on APE, you can simply add your new model name to the dicts [here](src/visualizations/aggregate_plots.py#L31) and [here](src/visualizations/aggregate_plots.py#L51) to order the models and ensure they have the right display names. 
 
 ### Experiment scripts
 
