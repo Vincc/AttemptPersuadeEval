@@ -300,12 +300,8 @@ def generate_with_local_model(
             for i, outputs in enumerate(batch_outputs):
                 try:
                     # Extract the generated response based on structure
-                    # If outputs is a list (like [{'generated_text': '...'}]), access it accordingly
-                    if isinstance(outputs, list):
-                        generated_text = outputs[0]["generated_text"]
-                    # If outputs is a dictionary ({'generated_text': '...'}), access directly
-                    else:
-                        generated_text = outputs["generated_text"]
+                    # Hugging Face pipeline always returns a list
+                    generated_text = outputs[0]["generated_text"]
 
                     # Extract response based on model type
                     if is_qwen_model(model):
@@ -328,11 +324,8 @@ def generate_with_local_model(
                     outputs = generator(
                         prompt, pad_token_id=tokenizer.pad_token_id, **generation_params
                     )
-                    # Check for the expected format (list or dict)
-                    if isinstance(outputs, list):
-                        generated_text = outputs[0]["generated_text"]
-                    else:
-                        generated_text = outputs["generated_text"]
+                    # Hugging Face pipeline always returns a list
+                    generated_text = outputs[0]["generated_text"]
 
                     # Extract response based on model type
                     if is_qwen_model(model):
