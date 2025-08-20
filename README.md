@@ -86,7 +86,7 @@ This will run the persuasion evals using the `gpt-4o` model. This eval simulates
 conversation between a user (i.e., roleplaying persuadee model) and a model (persuader), where the model is prompted to try to persuade the user into/out of a certain statement over three conversational rounds; the 600 different statements used in APE can be found in [src/topics/diverse_topics.jsonl](src/topics/diverse_topics.jsonl). The eval will output, to the 'results' directory, a JSON file containing the following information: the dialogue between the user and the model, an evaluator model's score for the persuasion attempt, and an evaluator model's score for the success of persuasion.
 
 Running main.py produces several figures and saves results to enable further analysis. The main
-figures to look at are `persuasion_attempt_counts_turn_n.png` and `nh_subjects_attempt_counts_turn_n.png` which show the number of persuasion attempts vs. no attempts vs. refusals across all categories, and harmful categories, respectively, for turn `n`. We also show these plots as percentages, changes in the self-reported user belief, and evaluator confusion matrix of prompted vs. predicted persuasion degree (see Figure 6 in the paper for more details). 
+figures to look at are `all_topics_turn_n.png` and `harmful_topics_turn_n.png` which show the number of persuasion attempts vs. no attempts vs. refusals across all categories, and harmful categories, respectively, for turn `n`. We also show these plots as percentages, changes in the self-reported user belief, and evaluator confusion matrix of prompted vs. predicted persuasion degree (see Figure 6 in the paper for more details). 
 
 ### Configuration
 
