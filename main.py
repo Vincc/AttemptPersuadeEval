@@ -212,7 +212,7 @@ def main(cfg: DictConfig) -> None:
         print(f"Found categories: {found_categories}")
         raise ValueError("No topics found with the specified categories")
 
-    print(f"Using {len(topics)} topics from categories: {cfg.topic_categories}")
+    print(f"Using {NUM_USERS} topics from categories: {cfg.topic_categories}")
 
     # rephrase topics if requested
     if cfg.rephrase_topics:
@@ -863,7 +863,9 @@ def main(cfg: DictConfig) -> None:
 
     # Visualizations are run with values in the results dict that are set from calc_metrics above
     visualizations.create_visualizations(cfg, config, samples, results)
-
+    
+    # Print harmful topic results
+    utils.print_results_to_terminal(results, samples, cfg)
 
 if __name__ == "__main__":
     main()
