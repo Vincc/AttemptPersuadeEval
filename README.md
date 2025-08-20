@@ -1,6 +1,7 @@
 # The Attempt to Persuade Eval (APE)
 
 📄 **Paper**: [Attempt to Persuade Eval (APE)](https://www.arxiv.org/abs/2506.02873)
+🌐 **Blog Post**: [Attempt to Persuade Eval Blog Post](https://far.ai/attempt-to-persuade-eval)
 
 <p align="center">
   <img src="assets/APE_Persuasion.png" width="400">
@@ -9,8 +10,10 @@
 ⚠️ **Content Warning**: This repository contains examples and discussions of sensitive and potentially distressing topics.
 
 This repository contains the code for the Attempt to Persuade Eval (APE)
-project. The goal of the project is to develop a set of evaluation metrics for
-measuring the *attempt* of language models to persuade.
+project. This eval provides a set of evaluation metrics for
+measuring the *attempt* of language models to persuade on a broad range of topics, from benign ones like
+cake is better than pie, to harmful ones like terrorism or physical violence. You can use this eval
+to test whether your model will attempt to persuade users across these topic categories.
 
 ## Setup
 
@@ -85,8 +88,30 @@ python main.py persuader_model=gpt-4o
 This will run the persuasion evals using the `gpt-4o` model. This eval simulates a
 conversation between a user (i.e., roleplaying persuadee model) and a model (persuader), where the model is prompted to try to persuade the user into/out of a certain statement over three conversational rounds; the 600 different statements used in APE can be found in [src/topics/diverse_topics.jsonl](src/topics/diverse_topics.jsonl). The eval will output, to the 'results' directory, a JSON file containing the following information: the dialogue between the user and the model, an evaluator model's score for the persuasion attempt, and an evaluator model's score for the success of persuasion.
 
-Running main.py produces several figures and saves results to enable further analysis. The main
-figures to look at are `all_topics_turn_n.png` and `harmful_topics_turn_n.png` which show the number of persuasion attempts vs. no attempts vs. refusals across all categories, and harmful categories, respectively, for turn `n`. We also show these plots as percentages, changes in the self-reported user belief, and evaluator confusion matrix of prompted vs. predicted persuasion degree (see Figure 6 in the paper for more details). 
+### How to Interpret Eval Outputs
+
+One core result of running main.py when comparing different models is the % of attempts on harmful topics, which is printed to the terminal at the end of main.py under `CORE RESULT`. After this, a more detailed breakdown of attempts, no-attempts, and refusals is provided over all turns for each category under `DETAILED BREAKDOWN`.
+
+In addition, `visualizations.create_visualizations` generates and saves several figures and files to enable further analysis. An example output for GPT-4o ran on the entire eval can be found [here](assets/example_gpt4o). The main figures to look at are `all_topics_turn_n.png` and `harmful_topics_turn_n.png` which show the percentage of persuasion attempts vs. no attempts vs. refusals across all categories, and harmful categories, respectively, for turn `n` (see below for turn 1 GPT-4o example). We also save plots of changes in the self-reported user belief and evaluator confusion matrix of prompted vs. predicted persuasion degree (see Figure 6 in the paper for more details on ablations). The files `all_metrics.json`, `base_sampled_data.jsonl`, and `evaluator_accuracy_metrics` are not visualized directly but saved to enable further analysis.
+
+<p align="center">
+  <img src="assets/example_gpt4o/all_topics_turn_1.png" width="500">
+  <img src="assets/example_gpt4o/harmful_topics_turn_1.png" width="500">
+</p>
+
+### Viewing conversations from results
+
+The conversations are saved to the `conversation_log.jsonl` file. To view conversations from the results of the persuasion evals, we use the [logviz library](https://github.com/naimenz/logviz). We have included a version of the library in the
+logviz repository. First, install logviz as a library using the following command:
+
+```bash
+cd logviz
+pip install -e .
+```
+
+To visualize the results, run `logviz` from terminal and then drag the `conversation_log.jsonl` file
+containing the results into the window. This will display the conversation results
+in a visual format.
 
 ### Configuration
 
@@ -192,28 +217,6 @@ The default topics file can be found at `src/topics/diverse_topics.jsonl` which 
 #### Adding new Topics
 
 To add new topics to the persuasion conversations, simply add a new line in [src/topics/diverse_topics.jsonl](src/topics/diverse_topics.jsonl). This includes a `category`, `short_title`, `text`, and `subject`. Alternatively, you can create your own topic list via a `.jsonl` file with the above keys in the `src/topics/` directory and then adjusting the `topics_file` parameter to point to it. New harmful topics can be generated using the script at `src/utils/generate_harmful_texts.py`, but note that for the harmful topics used in the paper, we use a currently unreleased jailbroken model, but provide this script anyway which can be used with an OpenAI models. 
-
-## Results
-
-### Visualizing results
-
-Graphs of the results are automatically generated and created in the same directory as all other results.
-More visualization tooling is available, see instructions at [src/visualizations/README.md](src/visualizations/README.md)
-
-### Viewing conversations from results
-
-To view conversations from the results of the persuasion evals, we use the [logviz library](
-https://github.com/naimenz/logviz). We have included a version of the library in the
-logviz repository. First, install logviz as a library using the following command:
-
-```bash
-cd logviz
-pip install -e .
-```
-
-To visualize the results, run `logviz` from terminal and then drag the `conversation_log.jsonl` file
-containing the results into the window. This will display the conversation results
-in a visual format.
 
 ## Human annotation pipeline
 
