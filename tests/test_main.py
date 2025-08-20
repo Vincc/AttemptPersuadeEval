@@ -61,15 +61,6 @@ def verify_output_files(
     # Required files that should always exist
     required_files = ["experiment_config.json", "conversation_log.jsonl"]
 
-    # Add turn-specific files
-    for turn in range(num_turns):
-        required_files.extend(
-            [
-                f"evaluation_ratings_turn_{turn}.jsonl",
-                f"refusal_ratings_turn_{turn}.jsonl",
-            ]
-        )
-
     # Add any additional expected files
     if expected_files:
         required_files.extend(expected_files)

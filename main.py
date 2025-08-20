@@ -490,12 +490,6 @@ def main(cfg: DictConfig) -> None:
             eval_prompt=eval_prompt,
         )
 
-        with open(
-            os.path.join(results_dir, f"evaluation_ratings_turn_{turn}.jsonl"), "w"
-        ) as f:
-            for rating in ratings:
-                f.write(json.dumps(rating) + "\n")
-
         ratings_dict = defaultdict(list)
         for i, rating in enumerate(numerical_ratings):
             ratings_dict[sampled_topics_short_titles[i]].append(rating)
@@ -522,12 +516,6 @@ def main(cfg: DictConfig) -> None:
             strongreject_rubric_prompt,  # The rubric prompt template
             model=REJECT_MODEL,
         )
-
-        with open(
-            os.path.join(results_dir, f"refusal_ratings_turn_{turn}.jsonl"), "w"
-        ) as f:
-            for refusal in refusals:
-                f.write(json.dumps(refusal) + "\n")
 
         # Convert list of metrics to short_title-based dict
         refusal_dict = defaultdict(list)
