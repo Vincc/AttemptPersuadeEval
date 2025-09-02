@@ -236,7 +236,7 @@ def create_visualizations(args, config, samples, results):
             attempt_percentages = []
             no_attempt_percentages = []
             refusal_percentages = []
-            
+
             for i, category in enumerate(categories):
                 total = (
                     with_attempt_counts[i] + no_attempt_counts[i] + refusal_counts[i]
@@ -252,15 +252,15 @@ def create_visualizations(args, config, samples, results):
 
             # Create the percentage bar plot with three bars
             fig, ax = plt.subplots(figsize=(16, 10))
-            
+
             # Set the width of the bars
             bar_width = 0.25
-            
+
             # Set position of bars on x axis
             r1 = np.arange(len(categories))
             r2 = [x + bar_width for x in r1]
             r3 = [x + bar_width for x in r2]
-            
+
             # Create bars
             ax.bar(
                 r1,
@@ -268,8 +268,8 @@ def create_visualizations(args, config, samples, results):
                 width=bar_width,
                 label="With Persuasion Attempt",
                 color="skyblue",
-                edgecolor='navy',
-                linewidth=1.5
+                edgecolor="navy",
+                linewidth=1.5,
             )
             ax.bar(
                 r2,
@@ -277,8 +277,8 @@ def create_visualizations(args, config, samples, results):
                 width=bar_width,
                 label="No Persuasion Attempt",
                 color="lightgreen",
-                edgecolor='darkgreen',
-                linewidth=1.5
+                edgecolor="darkgreen",
+                linewidth=1.5,
             )
             ax.bar(
                 r3,
@@ -286,43 +286,68 @@ def create_visualizations(args, config, samples, results):
                 width=bar_width,
                 label="Refusal",
                 color="salmon",
-                edgecolor='darkred',
-                linewidth=1.5
+                edgecolor="darkred",
+                linewidth=1.5,
             )
-            
+
             # Add labels and title with larger font
-            ax.set_xlabel("Topic Category", fontsize=16, fontweight='bold')
-            ax.set_ylabel("Percentage of Conversations (%)", fontsize=16, fontweight='bold')
+            ax.set_xlabel("Topic Category", fontsize=16, fontweight="bold")
+            ax.set_ylabel(
+                "Percentage of Conversations (%)", fontsize=16, fontweight="bold"
+            )
             ax.set_title(
                 f"Turn {turn_idx + 1}: Conversation Outcomes by Topic Category",
                 fontsize=18,
-                fontweight='bold',
-                pad=20
+                fontweight="bold",
+                pad=20,
             )
             ax.set_xticks([r + bar_width for r in range(len(categories))])
             ax.set_xticklabels(categories, fontsize=14)
-            plt.xticks(rotation=45, ha='right')
-            
+            plt.xticks(rotation=45, ha="right")
+
             # Add legend to the right side
-            ax.legend(fontsize=14, loc='center left', bbox_to_anchor=(1, 0.5))
-            
+            ax.legend(fontsize=14, loc="center left", bbox_to_anchor=(1, 0.5))
+
             # Add value labels on top of bars
-            for i, (v1, v2, v3) in enumerate(zip(attempt_percentages, no_attempt_percentages, refusal_percentages)):
+            for i, (v1, v2, v3) in enumerate(
+                zip(attempt_percentages, no_attempt_percentages, refusal_percentages)
+            ):
                 if v1 > 0:
-                    ax.text(i, v1 + 1, f"{v1:.1f}%", ha='center', fontsize=12, fontweight="bold")
+                    ax.text(
+                        i,
+                        v1 + 1,
+                        f"{v1:.1f}%",
+                        ha="center",
+                        fontsize=12,
+                        fontweight="bold",
+                    )
                 if v2 > 0:
-                    ax.text(i + bar_width, v2 + 1, f"{v2:.1f}%", ha='center', fontsize=12, fontweight="bold")
+                    ax.text(
+                        i + bar_width,
+                        v2 + 1,
+                        f"{v2:.1f}%",
+                        ha="center",
+                        fontsize=12,
+                        fontweight="bold",
+                    )
                 if v3 > 0:
-                    ax.text(i + 2 * bar_width, v3 + 1, f"{v3:.1f}%", ha='center', fontsize=12, fontweight="bold")
-            
+                    ax.text(
+                        i + 2 * bar_width,
+                        v3 + 1,
+                        f"{v3:.1f}%",
+                        ha="center",
+                        fontsize=12,
+                        fontweight="bold",
+                    )
+
             # Add a grid for better readability
-            ax.grid(True, axis="y", alpha=0.3, linestyle='--')
-            
+            ax.grid(True, axis="y", alpha=0.3, linestyle="--")
+
             # Set y-axis to percentage scale
             ax.set_ylim(0, 105)
             ax.set_yticks(range(0, 101, 10))
-            ax.tick_params(axis='y', labelsize=12)
-            
+            ax.tick_params(axis="y", labelsize=12)
+
             # Save figure
             plt.tight_layout()
             plt.savefig(
@@ -331,7 +356,7 @@ def create_visualizations(args, config, samples, results):
                     f"all_topics_turn_{turn_idx + 1}.png",
                 ),
                 dpi=300,
-                bbox_inches='tight'
+                bbox_inches="tight",
             )
             plt.close()
 
@@ -430,7 +455,7 @@ def create_visualizations(args, config, samples, results):
                 attempt_percentages = []
                 no_attempt_percentages = []
                 refusal_percentages = []
-                
+
                 for i, subject in enumerate(subjects):
                     total = (
                         with_attempt_counts[i]
@@ -439,7 +464,9 @@ def create_visualizations(args, config, samples, results):
                     )
                     if total > 0:
                         attempt_percentages.append(with_attempt_counts[i] / total * 100)
-                        no_attempt_percentages.append(no_attempt_counts[i] / total * 100)
+                        no_attempt_percentages.append(
+                            no_attempt_counts[i] / total * 100
+                        )
                         refusal_percentages.append(refusal_counts[i] / total * 100)
                     else:
                         attempt_percentages.append(0)
@@ -448,15 +475,15 @@ def create_visualizations(args, config, samples, results):
 
                 # Create the percentage bar plot with three bars
                 fig, ax = plt.subplots(figsize=(16, 10))
-                
+
                 # Set the width of the bars
                 bar_width = 0.25
-                
+
                 # Set position of bars on x axis
                 r1 = np.arange(len(subjects))
                 r2 = [x + bar_width for x in r1]
                 r3 = [x + bar_width for x in r2]
-                
+
                 # Create bars
                 ax.bar(
                     r1,
@@ -464,8 +491,8 @@ def create_visualizations(args, config, samples, results):
                     width=bar_width,
                     label="With Persuasion Attempt",
                     color="skyblue",
-                    edgecolor='navy',
-                    linewidth=1.5
+                    edgecolor="navy",
+                    linewidth=1.5,
                 )
                 ax.bar(
                     r2,
@@ -473,8 +500,8 @@ def create_visualizations(args, config, samples, results):
                     width=bar_width,
                     label="No Persuasion Attempt",
                     color="lightgreen",
-                    edgecolor='darkgreen',
-                    linewidth=1.5
+                    edgecolor="darkgreen",
+                    linewidth=1.5,
                 )
                 ax.bar(
                     r3,
@@ -482,43 +509,72 @@ def create_visualizations(args, config, samples, results):
                     width=bar_width,
                     label="Refusal",
                     color="salmon",
-                    edgecolor='darkred',
-                    linewidth=1.5
+                    edgecolor="darkred",
+                    linewidth=1.5,
                 )
-                
+
                 # Add labels and title with larger font
-                ax.set_xlabel("NoncontroversiallyHarmful Subjects", fontsize=16, fontweight='bold')
-                ax.set_ylabel("Percentage of Conversations (%)", fontsize=16, fontweight='bold')
+                ax.set_xlabel(
+                    "NoncontroversiallyHarmful Subjects", fontsize=16, fontweight="bold"
+                )
+                ax.set_ylabel(
+                    "Percentage of Conversations (%)", fontsize=16, fontweight="bold"
+                )
                 ax.set_title(
                     f"Turn {turn_idx + 1}: Conversation Outcomes by NoncontroversiallyHarmful Subjects",
                     fontsize=18,
-                    fontweight='bold',
-                    pad=20
+                    fontweight="bold",
+                    pad=20,
                 )
                 ax.set_xticks([r + bar_width for r in range(len(subjects))])
                 ax.set_xticklabels(subjects, fontsize=14)
-                plt.xticks(rotation=45, ha='right')
-                
+                plt.xticks(rotation=45, ha="right")
+
                 # Add legend to the right side
-                ax.legend(fontsize=14, loc='center left', bbox_to_anchor=(1, 0.5))
-                
+                ax.legend(fontsize=14, loc="center left", bbox_to_anchor=(1, 0.5))
+
                 # Add value labels on top of bars
-                for i, (v1, v2, v3) in enumerate(zip(attempt_percentages, no_attempt_percentages, refusal_percentages)):
+                for i, (v1, v2, v3) in enumerate(
+                    zip(
+                        attempt_percentages, no_attempt_percentages, refusal_percentages
+                    )
+                ):
                     if v1 > 0:
-                        ax.text(i, v1 + 1, f"{v1:.1f}%", ha='center', fontsize=12, fontweight="bold")
+                        ax.text(
+                            i,
+                            v1 + 1,
+                            f"{v1:.1f}%",
+                            ha="center",
+                            fontsize=12,
+                            fontweight="bold",
+                        )
                     if v2 > 0:
-                        ax.text(i + bar_width, v2 + 1, f"{v2:.1f}%", ha='center', fontsize=12, fontweight="bold")
+                        ax.text(
+                            i + bar_width,
+                            v2 + 1,
+                            f"{v2:.1f}%",
+                            ha="center",
+                            fontsize=12,
+                            fontweight="bold",
+                        )
                     if v3 > 0:
-                        ax.text(i + 2 * bar_width, v3 + 1, f"{v3:.1f}%", ha='center', fontsize=12, fontweight="bold")
-                
+                        ax.text(
+                            i + 2 * bar_width,
+                            v3 + 1,
+                            f"{v3:.1f}%",
+                            ha="center",
+                            fontsize=12,
+                            fontweight="bold",
+                        )
+
                 # Add a grid for better readability
-                ax.grid(True, axis="y", alpha=0.3, linestyle='--')
-                
+                ax.grid(True, axis="y", alpha=0.3, linestyle="--")
+
                 # Set y-axis to percentage scale
                 ax.set_ylim(0, 105)
                 ax.set_yticks(range(0, 101, 10))
-                ax.tick_params(axis='y', labelsize=12)
-                
+                ax.tick_params(axis="y", labelsize=12)
+
                 # Save figure
                 plt.tight_layout()
                 plt.savefig(
@@ -527,7 +583,7 @@ def create_visualizations(args, config, samples, results):
                         f"harmful_topics_turn_{turn_idx + 1}.png",
                     ),
                     dpi=300,
-                    bbox_inches='tight'
+                    bbox_inches="tight",
                 )
                 plt.close()
 
@@ -868,63 +924,77 @@ def create_visualizations(args, config, samples, results):
                 label=f"Turn {turn_idx + 1}",
                 color=colors[turn_idx],
                 alpha=0.9,
-                edgecolor='black',
-                linewidth=1.2
+                edgecolor="black",
+                linewidth=1.2,
             )
 
             # Add text labels with improved formatting
             for i, (bar, percentage) in enumerate(zip(bars, percentages)):
                 if percentage > 0:  # Only label non-zero bars
                     category = all_categories[i]
-                    with_attempt = turn_data[category]["with_attempt"]
+                    turn_data[category]["with_attempt"]
                     total = turn_data[category]["total"]
 
                     # Position text slightly above bar
                     height = bar.get_height()
                     ax.text(
-                        bar.get_x() + bar.get_width()/2,
+                        bar.get_x() + bar.get_width() / 2,
                         height + 1,
                         f"{percentage:.0f}",
                         ha="center",
                         va="bottom",
                         fontsize=10,
-                        fontweight='bold',
-                        rotation=0
+                        fontweight="bold",
+                        rotation=0,
                     )
 
         # Set chart labels and properties with larger fonts
-        ax.set_xlabel("Topic Category", fontsize=18, fontweight='bold')
-        ax.set_ylabel("Percentage of Conversations with Persuasion Attempt (%)", fontsize=18, fontweight='bold')
-        ax.set_title("Persuasion Attempt Percentages by Category Across All Turns", 
-                    fontsize=20, fontweight='bold', pad=20)
+        ax.set_xlabel("Topic Category", fontsize=18, fontweight="bold")
+        ax.set_ylabel(
+            "Percentage of Conversations with Persuasion Attempt (%)",
+            fontsize=18,
+            fontweight="bold",
+        )
+        ax.set_title(
+            "Persuasion Attempt Percentages by Category Across All Turns",
+            fontsize=20,
+            fontweight="bold",
+            pad=20,
+        )
 
         # Set x-ticks at category positions with larger font
         ax.set_xticks(indices)
         ax.set_xticklabels(all_categories, fontsize=14)
-        plt.xticks(rotation=45, ha='right')
+        plt.xticks(rotation=45, ha="right")
 
         # Add a legend with improved styling
-        legend = ax.legend(title="Conversation Turn", fontsize=14, 
-                          loc='center left', bbox_to_anchor=(1, 0.5),
-                          frameon=True, fancybox=True, shadow=True)
+        legend = ax.legend(
+            title="Conversation Turn",
+            fontsize=14,
+            loc="center left",
+            bbox_to_anchor=(1, 0.5),
+            frameon=True,
+            fancybox=True,
+            shadow=True,
+        )
         legend.get_title().set_fontsize(16)
-        legend.get_title().set_fontweight('bold')
+        legend.get_title().set_fontweight("bold")
 
         # Add a grid and set y-axis limits
-        ax.grid(True, axis="y", alpha=0.3, linestyle='--')
+        ax.grid(True, axis="y", alpha=0.3, linestyle="--")
         ax.set_ylim(0, 110)  # Leave room for labels at the top
         ax.set_yticks(range(0, 101, 10))
-        ax.tick_params(axis='y', labelsize=12)
+        ax.tick_params(axis="y", labelsize=12)
 
         # Add subtle background color
-        ax.set_facecolor('#f9f9f9')
+        ax.set_facecolor("#f9f9f9")
 
         # Tight layout and save with high DPI
         plt.tight_layout()
         plt.savefig(
             os.path.join(results_dir, "persuasion_attempt_percentages_all_turns.png"),
             dpi=300,
-            bbox_inches='tight'
+            bbox_inches="tight",
         )
         plt.close()
 

@@ -173,13 +173,13 @@ A list of models that can be used as the persuader are as follows:
 
 #### Adding new models
 
-To add more models you will need to modify `src/generate_conversations/generate.py` to ensure the appropriate sampling format is used with your model. 
+To add more models you will need to modify `src/generate_conversations/generate.py` to ensure the appropriate sampling format is used with your model.
 
 (1) API Models: For API calls, you should modify the `process_messages` function defined inside the `generate_llm` function. You should make sure that the model can be accessed through the [LiteLLM library](https://docs.litellm.ai/docs/) which is used in this repo for making API calls.
 
-(2) Local Models: For local models, First, download the checkpoints to `src/ckpts` and ensure the [`preload_local_model`](src/generate_conversations/generate.py#L33) function loads your new model correctly. Then, either use models from Huggingface and prepend `hf/` to the model name, or modify [this line](src/generate_conversations/generate.py#L375) to ensure it uses a custom local generation function. The easiest way to sample from a new model is to modify [`generate_with_local_model`](src/generate_conversations/generate.py#L209) to include the new model [in this if statement](src/generate_conversations/generate.py#L311). As well, you should define any required pre- or post-processing formatting for the new model, e.g., like for [the Qwen 3 model here](src/generate_conversations/generate.py#L102) and [here](src/generate_conversations/generate.py#L140). 
+(2) Local Models: For local models, First, download the checkpoints to `src/ckpts` and ensure the [`preload_local_model`](src/generate_conversations/generate.py#L33) function loads your new model correctly. Then, either use models from Huggingface and prepend `hf/` to the model name, or modify [this line](src/generate_conversations/generate.py#L375) to ensure it uses a custom local generation function. The easiest way to sample from a new model is to modify [`generate_with_local_model`](src/generate_conversations/generate.py#L209) to include the new model [in this if statement](src/generate_conversations/generate.py#L311). As well, you should define any required pre- or post-processing formatting for the new model, e.g., like for [the Qwen 3 model here](src/generate_conversations/generate.py#L102) and [here](src/generate_conversations/generate.py#L140).
 
-(3) Visualizations: To include new models in the aggregate visualizations that compare various models after running them on APE, you can simply add your new model name to the dicts [here](src/visualizations/aggregate_plots.py#L31) and [here](src/visualizations/aggregate_plots.py#L51) to order the models and ensure they have the right display names. 
+(3) Visualizations: To include new models in the aggregate visualizations that compare various models after running them on APE, you can simply add your new model name to the dicts [here](src/visualizations/aggregate_plots.py#L31) and [here](src/visualizations/aggregate_plots.py#L51) to order the models and ensure they have the right display names.
 
 ### Experiment scripts
 
@@ -216,7 +216,7 @@ The default topics file can be found at `src/topics/diverse_topics.jsonl` which 
 
 #### Adding new Topics
 
-To add new topics to the persuasion conversations, simply add a new line in [src/topics/diverse_topics.jsonl](src/topics/diverse_topics.jsonl). This includes a `category`, `short_title`, `text`, and `subject`. Alternatively, you can create your own topic list via a `.jsonl` file with the above keys in the `src/topics/` directory and then adjusting the `topics_file` parameter to point to it. New harmful topics can be generated using the script at `src/utils/generate_harmful_texts.py`, but note that for the harmful topics used in the paper, we use a currently unreleased jailbroken model, but provide this script anyway which can be used with an OpenAI models. 
+To add new topics to the persuasion conversations, simply add a new line in [src/topics/diverse_topics.jsonl](src/topics/diverse_topics.jsonl). This includes a `category`, `short_title`, `text`, and `subject`. Alternatively, you can create your own topic list via a `.jsonl` file with the above keys in the `src/topics/` directory and then adjusting the `topics_file` parameter to point to it. New harmful topics can be generated using the script at `src/utils/generate_harmful_texts.py`, but note that for the harmful topics used in the paper, we use a currently unreleased jailbroken model, but provide this script anyway which can be used with an OpenAI models.
 
 ## Human annotation pipeline
 

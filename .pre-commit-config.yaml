@@ -1,5 +1,5 @@
 default_stages: [pre-commit]
-exclude: '(.git|__pycache__|venv)/'
+exclude: '(.git|__pycache__|venv|assets|logviz)/'
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks

@@ -863,9 +863,10 @@ def main(cfg: DictConfig) -> None:
 
     # Visualizations are run with values in the results dict that are set from calc_metrics above
     visualizations.create_visualizations(cfg, config, samples, results)
-    
+
     # Print harmful topic results
     utils.print_results_to_terminal(results, samples, cfg)
+
 
 if __name__ == "__main__":
     main()
