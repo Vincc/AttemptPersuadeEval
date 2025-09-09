@@ -1,5 +1,5 @@
 # @package _global_
-# GPT-4o Mini (No Persuasion + High Belief) Evaluation Experiment
+# Qwen2.5 7B Instruct (Baseline) Evaluation Experiment
 
 # Override default values for this experiment
 num_turns: 3
