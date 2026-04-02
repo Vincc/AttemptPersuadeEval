@@ -191,4 +191,5 @@ logviz/dist/
 
 # local results
 results/
+new_results/
 src/ckpts/
